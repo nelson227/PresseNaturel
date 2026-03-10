@@ -5,7 +5,7 @@ import { clsx } from 'clsx';
 
 interface ButtonProps {
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'outline';
+  variant?: 'primary' | 'secondary' | 'outline' | 'white';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   [key: string]: any;
@@ -24,6 +24,7 @@ export default function Button({
     primary: 'bg-presse-dark text-white hover:bg-presse-green shadow-md hover:shadow-lg',
     secondary: 'bg-presse-green text-white hover:bg-presse-dark hover:text-white',
     outline: 'border-2 border-presse-green text-presse-green hover:bg-presse-green hover:text-white',
+    white: 'bg-white text-presse-dark hover:bg-presse-beige shadow-md hover:shadow-lg',
   };
 
   const sizeStyles = {

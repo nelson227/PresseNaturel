@@ -1,20 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Button from '@/components/Button';
 import { PRODUCTS, getPrices } from '@/lib/products';
-import Link from 'next/link';
 
 export default function CommanderPage() {
+  const router = useRouter();
   const [selectedProduct, setSelectedProduct] = useState('');
   const [size, setSize] = useState<'350ml' | '500ml'>('350ml');
   const [quantity, setQuantity] = useState('1');
-  const [customization, setCustomization] = useState('');
   const [deliveryMethod, setDeliveryMethod] = useState('pickup');
   const [paymentMethod, setPaymentMethod] = useState('interac');
-  const [submitted, setSubmitted] = useState(false);
   const [notes, setNotes] = useState('');
 
   const prices = getPrices();
@@ -24,9 +23,25 @@ export default function CommanderPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    // Reset après 5 secondes
-    setTimeout(() => setSubmitted(false), 5000);
+
+    // Vérifier que tous les champs requis sont remplis
+    if (!selectedProduct) {
+      alert('Veuillez sélectionner un produit');
+      return;
+    }
+
+    // Créer les paramètres de requête
+    const params = new URLSearchParams({
+      productId: selectedProduct,
+      size,
+      quantity,
+      deliveryMethod,
+      paymentMethod,
+      notes,
+    });
+
+    // Rediriger vers la page de confirmation
+    router.push(`/confirmation?${params.toString()}`);
   };
 
   return (
@@ -187,12 +202,6 @@ export default function CommanderPage() {
                 <Button size="lg" className="w-full" type="submit">
                   Confirmer la commande
                 </Button>
-
-                {submitted && (
-                  <div className="p-4 bg-presse-green text-white rounded-lg">
-                    ✓ Commande soumise! Vous serez contacté bientôt.
-                  </div>
-                )}
               </form>
             </div>
 

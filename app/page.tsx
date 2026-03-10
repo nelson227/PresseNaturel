@@ -161,7 +161,7 @@ export default function Home() {
             Commandez vos jus frais dès maintenant et goûtez la différence
           </p>
           <Link href="/commander">
-            <Button className="bg-white text-presse-green hover:bg-presse-beige">
+            <Button variant="white">
               Commander maintenant
               <FiArrowRight />
             </Button>
