@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Button from '@/components/Button';
 import Testimonial from '@/components/Testimonial';
 import { PRODUCTS } from '@/lib/products';
+import { getTestimonials, addTestimonial } from '@/lib/testimonials';
 
 export default function AvisPage() {
   const [rating, setRating] = useState<number>(5);
@@ -13,40 +14,22 @@ export default function AvisPage() {
   const [authorName, setAuthorName] = useState('');
   const [selectedProduct, setSelectedProduct] = useState('');
   const [submitted, setSubmitted] = useState(false);
-  const [reviews, setReviews] = useState([
-    {
-      name: 'Sarah M.',
-      rating: 5,
-      comment: 'Les jus sont absolument délicieux! Je sens vraiment la fraîcheur. Commande chaque semaine.',
-    },
-    {
-      name: 'Marc T.',
-      rating: 5,
-      comment: 'Excellente qualité. Les ingrédients sont visiblement frais et naturels. Très recommandé!',
-    },
-    {
-      name: 'Julie L.',
-      rating: 5,
-      comment: 'Pressé Naturel est devenu un essentiellement dans ma routine quotidienne. Merci!',
-    },
-    {
-      name: 'Pierre D.',
-      rating: 5,
-      comment: 'Service impeccable et produits de très haute qualité. Je recommande vivement!',
-    },
-  ]);
+  const [reviews, setReviews] = useState(getTestimonials());
 
-  const handleSubmitReview = (e: React.FormEvent) => {
+  const handleSubmitReview = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (authorName && comment && selectedProduct) {
-      setReviews([
-        {
-          name: authorName,
-          rating,
-          comment,
-        },
-        ...reviews,
-      ]);
+      // Ajouter l'avis au système centralisé
+      addTestimonial({
+        name: authorName,
+        rating,
+        comment,
+      });
+
+      // Mettre à jour l'état local
+      setReviews(getTestimonials());
+
+      // Réinitialiser le formulaire
       setAuthorName('');
       setComment('');
       setRating(5);
@@ -54,7 +37,7 @@ export default function AvisPage() {
       setSubmitted(true);
       setTimeout(() => setSubmitted(false), 3000);
     }
-  };
+  }, [authorName, comment, rating, selectedProduct]);
 
   return (
     <div className="min-h-screen bg-presse-white">
@@ -160,8 +143,13 @@ export default function AvisPage() {
             {/* Liste des avis */}
             <div className="lg:col-span-2">
               <div className="space-y-6">
-                {reviews.map((review, idx) => (
-                  <Testimonial key={idx} {...review} />
+                {reviews.map((review) => (
+                  <Testimonial
+                    key={review.id}
+                    name={review.name}
+                    rating={review.rating}
+                    comment={review.comment}
+                  />
                 ))}
               </div>
             </div>

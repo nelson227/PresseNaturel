@@ -5,31 +5,16 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
-import Testimonial from '@/components/Testimonial';
+import TestimonialCarousel from '@/components/TestimonialCarousel';
 import Feature from '@/components/Feature';
 import Button from '@/components/Button';
 import { PRODUCTS } from '@/lib/products';
+import { getTestimonials } from '@/lib/testimonials';
 import { FiArrowRight } from 'react-icons/fi';
 
 export default function Home() {
   const featuredProducts = PRODUCTS.slice(0, 4);
-  const testimonials = [
-    {
-      name: 'Sarah M.',
-      rating: 5,
-      comment: 'Les jus sont absolument délicieux! Je sens vraiment la fraîcheur. Commande chaque semaine.',
-    },
-    {
-      name: 'Marc T.',
-      rating: 5,
-      comment: 'Excellente qualité. Les ingrédients sont visiblement frais et naturels. Très recommandé!',
-    },
-    {
-      name: 'Julie L.',
-      rating: 5,
-      comment: 'Pressé Naturel est devenu un essentiellement dans ma routine quotidienne. Merci!',
-    },
-  ];
+  const testimonials = getTestimonials();
 
   return (
     <div className="min-h-screen bg-presse-white">
@@ -138,16 +123,12 @@ export default function Home() {
           <h2 className="font-playfair text-4xl font-bold text-presse-dark mb-16 text-center">
             Ce que nos clients disent
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, idx) => (
-              <Testimonial
-                key={idx}
-                name={testimonial.name}
-                rating={testimonial.rating}
-                comment={testimonial.comment}
-              />
-            ))}
-          </div>
+          <TestimonialCarousel
+            testimonials={testimonials}
+            autoScroll
+            autoScrollInterval={4000}
+            itemsPerView={3}
+          />
         </div>
       </section>
 
