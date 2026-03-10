@@ -21,8 +21,8 @@ export default function Button({
   const baseStyles = 'font-poppins font-semibold transition-all duration-300 rounded-lg inline-flex items-center justify-center gap-2';
 
   const variantStyles = {
-    primary: 'bg-presse-green text-white hover:bg-presse-dark shadow-md hover:shadow-lg',
-    secondary: 'bg-presse-green-light text-presse-green hover:bg-presse-green hover:text-white',
+    primary: 'bg-presse-dark text-white hover:bg-presse-green shadow-md hover:shadow-lg',
+    secondary: 'bg-presse-green text-white hover:bg-presse-dark hover:text-white',
     outline: 'border-2 border-presse-green text-presse-green hover:bg-presse-green hover:text-white',
   };
 
