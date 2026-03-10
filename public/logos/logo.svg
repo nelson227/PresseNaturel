@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="200" height="125">
+  <!-- Texte principal -->
+  <text x="250" y="200" font-family="Georgia, serif" font-size="120" font-weight="bold" fill="#2D5016" font-style="italic">Pressé</text>
+  <text x="250" y="320" font-family="Georgia, serif" font-size="120" font-weight="bold" fill="#2D5016" font-style="italic">Naturel</text>
+  
+  <!-- Feuille (coin supérieur droit) -->
+  <g transform="translate(700, 80)">
+    <!-- Feuille principale vert clair -->
+    <ellipse cx="0" cy="0" rx="35" ry="50" fill="#7CB342" transform="rotate(-30)"/>
+    <ellipse cx="0" cy="0" rx="30" ry="45" fill="#9CCC65" transform="rotate(-30)"/>
+    
+    <!-- Nervure centrale -->
+    <path d="M 0,-45 Q 5,-20 8,0 Q 5,20 0,45" stroke="#2D5016" stroke-width="2" fill="none"/>
+    
+    <!-- Nervures latérales -->
+    <path d="M -15,-30 Q -8,-15 -5,0" stroke="#2D5016" stroke-width="1" fill="none" opacity="0.6"/>
+    <path d="M 15,-30 Q 8,-15 5,0" stroke="#2D5016" stroke-width="1" fill="none" opacity="0.6"/>
+  </g>
+  
+  <!-- Ligne décorée sous le texte -->
+  <path d="M 250,350 Q 400,360 550,350" stroke="#2D5016" stroke-width="4" fill="none" stroke-linecap="round"/>
+</svg>
