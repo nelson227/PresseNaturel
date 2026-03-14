@@ -1,12 +1,17 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Button from '@/components/Button';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ComptePage() {
+  const router = useRouter();
+  const { user, login, register, logout, isLoading } = useAuth();
+  
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,22 +22,133 @@ export default function ComptePage() {
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
   const [postalCode, setPostalCode] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Rediriger si déjà connecté
+  useEffect(() => {
+    if (user && !isLoading) {
+      router.push('/');
+    }
+  }, [user, isLoading, router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!isLogin && password !== confirmPassword) {
-      alert('Les mots de passe ne correspondent pas');
-      return;
+    setError('');
+    setIsSubmitting(true);
+
+    try {
+      if (isLogin) {
+        // Connexion
+        const result = await login(email, password);
+        if (result.success) {
+          router.push('/');
+        } else {
+          setError(result.error || 'Erreur de connexion');
+        }
+      } else {
+        // Inscription
+        if (password !== confirmPassword) {
+          setError('Les mots de passe ne correspondent pas');
+          setIsSubmitting(false);
+          return;
+        }
+
+        if (password.length < 6) {
+          setError('Le mot de passe doit contenir au moins 6 caractères');
+          setIsSubmitting(false);
+          return;
+        }
+
+        const result = await register({
+          email,
+          password,
+          firstName,
+          lastName,
+          phone,
+          address: address || undefined,
+          city: city || undefined,
+          postalCode: postalCode || undefined,
+        });
+
+        if (result.success) {
+          router.push('/');
+        } else {
+          setError(result.error || 'Erreur lors de l\'inscription');
+        }
+      }
+    } catch (err) {
+      setError('Une erreur est survenue');
     }
 
-    // Simulation - dans une vraie app, connecter à une API
-    if (isLogin) {
-      alert('Connexion réussie! (Simulation)');
-    } else {
-      alert('Compte créé avec succès! (Simulation)');
-    }
+    setIsSubmitting(false);
   };
+
+  // Si l'utilisateur est connecté, afficher son profil
+  if (user) {
+    return (
+      <div className="min-h-screen bg-presse-white">
+        <Header />
+        <section className="pt-20 pb-12">
+          <div className="max-w-xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h1 className="font-playfair text-5xl font-bold text-presse-dark mb-4">
+                Mon Compte
+              </h1>
+              <p className="text-lg text-presse-dark font-inter">
+                Bienvenue, {user.firstName} !
+              </p>
+            </div>
+
+            <div className="bg-presse-beige p-8 rounded-lg">
+              <h2 className="font-poppins font-bold text-xl text-presse-dark mb-6">
+                Informations personnelles
+              </h2>
+              
+              <div className="space-y-4 mb-8">
+                <p className="text-presse-dark">
+                  <strong>Nom:</strong> {user.firstName} {user.lastName}
+                </p>
+                <p className="text-presse-dark">
+                  <strong>Email:</strong> {user.email}
+                </p>
+                <p className="text-presse-dark">
+                  <strong>Téléphone:</strong> {user.phone}
+                </p>
+                {user.address && (
+                  <p className="text-presse-dark">
+                    <strong>Adresse:</strong> {user.address}, {user.city} {user.postalCode}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex gap-4">
+                <Link href="/commander" className="flex-1">
+                  <Button className="w-full">Commander</Button>
+                </Link>
+                <button
+                  onClick={logout}
+                  className="flex-1 px-6 py-3 border-2 border-presse-green text-presse-green rounded-lg font-poppins font-semibold hover:bg-presse-green hover:text-white transition-colors"
+                >
+                  Déconnexion
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-presse-white flex items-center justify-center">
+        <p className="text-presse-dark">Chargement...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-presse-white">
@@ -55,7 +171,7 @@ export default function ComptePage() {
           <div className="flex justify-center mb-8">
             <div className="bg-presse-beige p-1 rounded-lg inline-flex">
               <button
-                onClick={() => setIsLogin(true)}
+                onClick={() => { setIsLogin(true); setError(''); }}
                 className={`px-6 py-2 rounded-lg font-poppins font-semibold transition-colors ${
                   isLogin 
                     ? 'bg-presse-green text-white' 
@@ -65,7 +181,7 @@ export default function ComptePage() {
                 Connexion
               </button>
               <button
-                onClick={() => setIsLogin(false)}
+                onClick={() => { setIsLogin(false); setError(''); }}
                 className={`px-6 py-2 rounded-lg font-poppins font-semibold transition-colors ${
                   !isLogin 
                     ? 'bg-presse-green text-white' 
@@ -76,6 +192,13 @@ export default function ComptePage() {
               </button>
             </div>
           </div>
+
+          {/* Message d'erreur */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-center">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="bg-presse-beige p-8 rounded-lg space-y-6">
             {/* Inscription - Infos personnelles */}
@@ -151,9 +274,13 @@ export default function ComptePage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                minLength={6}
                 className="w-full px-4 py-3 border-2 border-presse-green-light rounded-lg focus:border-presse-green focus:outline-none"
                 placeholder="••••••••"
               />
+              {!isLogin && (
+                <p className="text-xs text-presse-dark mt-1">Minimum 6 caractères</p>
+              )}
             </div>
 
             {/* Confirmation mot de passe - Inscription seulement */}
@@ -222,55 +349,52 @@ export default function ComptePage() {
               </div>
             )}
 
-            <Button size="lg" className="w-full" type="submit">
-              {isLogin ? 'Se connecter' : 'Créer mon compte'}
+            <Button size="lg" className="w-full" type="submit" disabled={isSubmitting}>
+              {isSubmitting 
+                ? 'Chargement...' 
+                : (isLogin ? 'Se connecter' : 'Créer mon compte')
+              }
             </Button>
-
-            {isLogin && (
-              <p className="text-center text-sm text-presse-dark">
-                <Link href="#" className="text-presse-green hover:underline">
-                  Mot de passe oublié?
-                </Link>
-              </p>
-            )}
           </form>
 
           {/* Avantages du compte */}
-          <div className="mt-12 bg-presse-green-light p-8 rounded-lg">
-            <h3 className="font-poppins font-bold text-xl text-presse-dark mb-6 text-center">
-              Pourquoi créer un compte?
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-start gap-3">
-                <span className="text-2xl">📦</span>
-                <div>
-                  <p className="font-semibold text-presse-dark">Suivi de commandes</p>
-                  <p className="text-sm text-presse-dark">Suivez vos commandes en temps réel</p>
+          {!isLogin && (
+            <div className="mt-12 bg-presse-green-light p-8 rounded-lg">
+              <h3 className="font-poppins font-bold text-xl text-presse-dark mb-6 text-center">
+                Pourquoi créer un compte?
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">📦</span>
+                  <div>
+                    <p className="font-semibold text-presse-dark">Suivi de commandes</p>
+                    <p className="text-sm text-presse-dark">Suivez vos commandes en temps réel</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <span className="text-2xl">🔄</span>
-                <div>
-                  <p className="font-semibold text-presse-dark">Abonnements</p>
-                  <p className="text-sm text-presse-dark">Recevez vos jus préférés régulièrement</p>
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">🔄</span>
+                  <div>
+                    <p className="font-semibold text-presse-dark">Abonnements</p>
+                    <p className="text-sm text-presse-dark">Recevez vos jus préférés régulièrement</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <span className="text-2xl">⚡</span>
-                <div>
-                  <p className="font-semibold text-presse-dark">Commande rapide</p>
-                  <p className="text-sm text-presse-dark">Vos infos pré-remplies</p>
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">⚡</span>
+                  <div>
+                    <p className="font-semibold text-presse-dark">Commande rapide</p>
+                    <p className="text-sm text-presse-dark">Vos infos pré-remplies</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <span className="text-2xl">🎁</span>
-                <div>
-                  <p className="font-semibold text-presse-dark">Offres exclusives</p>
-                  <p className="text-sm text-presse-dark">Promotions réservées aux membres</p>
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">🎁</span>
+                  <div>
+                    <p className="font-semibold text-presse-dark">Offres exclusives</p>
+                    <p className="text-sm text-presse-dark">Promotions réservées aux membres</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
