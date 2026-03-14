@@ -1,18 +1,17 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from './db.js';
 
-import authRoutes from './routes/auth';
-import adminRoutes from './routes/admin';
-import productRoutes from './routes/products';
-import orderRoutes from './routes/orders';
-import { seedDatabase } from './seed';
+import authRoutes from './routes/auth.js';
+import adminRoutes from './routes/admin.js';
+import productRoutes from './routes/products.js';
+import orderRoutes from './routes/orders.js';
+import { seedDatabase } from './seed.js';
 
 dotenv.config();
 
 const app = express();
-const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
