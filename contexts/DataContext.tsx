@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Product } from '@/lib/types';
+import { Product, OrderStatus } from '@/lib/types';
 import { PRODUCTS as INITIAL_PRODUCTS } from '@/lib/products';
 
 export interface Order {
@@ -25,7 +25,7 @@ export interface Order {
   deliveryMethod: 'pickup' | 'delivery';
   paymentMethod: 'interac' | 'cash';
   notes?: string;
-  status: 'pending' | 'confirmed' | 'ready' | 'completed' | 'cancelled';
+  status: OrderStatus;
   createdAt: string;
 }
 

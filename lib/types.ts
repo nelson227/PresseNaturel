@@ -1,3 +1,5 @@
+export type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
+
 export interface Product {
   id: string;
   name: string;
@@ -8,6 +10,7 @@ export interface Product {
   image?: string;
   shotOnly?: boolean; // Pour les produits disponibles uniquement en shot (60ml)
   featured?: boolean; // Pour les incontournables
+  packPrice?: number; // Prix pour les packs
   createdAt: string;
 }
 

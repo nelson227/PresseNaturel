@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import AdminLayout from '@/components/AdminLayout';
-import { useData } from '@/contexts/DataContext';
+import { useData, Order } from '@/contexts/DataContext';
 import { FiEye, FiX, FiClock, FiCheckCircle, FiPackage, FiTruck, FiXCircle } from 'react-icons/fi';
-import { Order, OrderStatus } from '@/lib/types';
+import { OrderStatus } from '@/lib/types';
 
 const statusConfig: Record<OrderStatus, { label: string; color: string; icon: React.ReactNode; bgColor: string }> = {
   pending: { 
@@ -134,6 +134,9 @@ export default function AdminCommandesPage() {
                     Client
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Produit
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Date
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -162,16 +165,22 @@ export default function AdminCommandesPage() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <p className="font-medium text-gray-900">
-                            {order.customerInfo.firstName} {order.customerInfo.lastName}
+                            {order.customer.firstName} {order.customer.lastName}
                           </p>
-                          <p className="text-sm text-gray-500">{order.customerInfo.email}</p>
+                          <p className="text-sm text-gray-500">{order.customer.email}</p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div>
+                          <p className="font-medium text-gray-900">{order.product.name}</p>
+                          <p className="text-sm text-gray-500">{order.size} × {order.quantity}</p>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {formatDate(order.createdAt)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="font-semibold text-gray-900">{order.total.toFixed(2)}€</span>
+                        <span className="font-semibold text-gray-900">{order.totalPrice.toFixed(2)}€</span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${status.bgColor} ${status.color}`}>
@@ -253,7 +262,7 @@ export default function AdminCommandesPage() {
                         onClick={() => handleStatusChange(selectedOrder.id, status)}
                         className={`px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 ${
                           selectedOrder.status === status 
-                            ? `${statusConfig[status].bgColor} ${statusConfig[status].color} ring-2 ring-offset-2 ring-${status === 'pending' ? 'yellow' : status === 'cancelled' ? 'red' : 'blue'}-400` 
+                            ? `${statusConfig[status].bgColor} ${statusConfig[status].color} ring-2 ring-offset-2` 
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                       >
@@ -270,66 +279,62 @@ export default function AdminCommandesPage() {
                   <div className="bg-gray-50 rounded-lg p-4 grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-xs text-gray-500">Nom</p>
-                      <p className="font-medium">{selectedOrder.customerInfo.firstName} {selectedOrder.customerInfo.lastName}</p>
+                      <p className="font-medium">{selectedOrder.customer.firstName} {selectedOrder.customer.lastName}</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500">Téléphone</p>
-                      <p className="font-medium">{selectedOrder.customerInfo.phone}</p>
+                      <p className="font-medium">{selectedOrder.customer.phone}</p>
                     </div>
                     <div className="col-span-2">
                       <p className="text-xs text-gray-500">Email</p>
-                      <p className="font-medium">{selectedOrder.customerInfo.email}</p>
+                      <p className="font-medium">{selectedOrder.customer.email}</p>
                     </div>
-                    <div className="col-span-2">
-                      <p className="text-xs text-gray-500">Adresse</p>
-                      <p className="font-medium">{selectedOrder.customerInfo.address}</p>
-                    </div>
-                    {selectedOrder.customerInfo.notes && (
+                    {selectedOrder.customer.address && (
+                      <div className="col-span-2">
+                        <p className="text-xs text-gray-500">Adresse</p>
+                        <p className="font-medium">
+                          {selectedOrder.customer.address}
+                          {selectedOrder.customer.city && `, ${selectedOrder.customer.city}`}
+                          {selectedOrder.customer.postalCode && ` ${selectedOrder.customer.postalCode}`}
+                        </p>
+                      </div>
+                    )}
+                    {selectedOrder.notes && (
                       <div className="col-span-2">
                         <p className="text-xs text-gray-500">Notes</p>
-                        <p className="font-medium">{selectedOrder.customerInfo.notes}</p>
+                        <p className="font-medium">{selectedOrder.notes}</p>
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* Order Items */}
+                {/* Order Details */}
                 <div>
-                  <h3 className="font-semibold text-gray-700 mb-2">Articles commandés</h3>
-                  <div className="bg-gray-50 rounded-lg overflow-hidden">
-                    <table className="w-full">
-                      <thead className="bg-gray-100">
-                        <tr>
-                          <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500">Produit</th>
-                          <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500">Qté</th>
-                          <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500">Prix</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {selectedOrder.items.map((item, idx) => (
-                          <tr key={idx}>
-                            <td className="px-4 py-3">
-                              <p className="font-medium text-gray-900">{item.productName}</p>
-                              {item.size && (
-                                <p className="text-sm text-gray-500">{item.size}</p>
-                              )}
-                            </td>
-                            <td className="px-4 py-3 text-center">{item.quantity}</td>
-                            <td className="px-4 py-3 text-right font-medium">
-                              {(item.price * item.quantity).toFixed(2)}€
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                      <tfoot className="bg-gray-100">
-                        <tr>
-                          <td colSpan={2} className="px-4 py-3 text-right font-semibold">Total</td>
-                          <td className="px-4 py-3 text-right font-bold text-lg text-presse-green">
-                            {selectedOrder.total.toFixed(2)}€
-                          </td>
-                        </tr>
-                      </tfoot>
-                    </table>
+                  <h3 className="font-semibold text-gray-700 mb-2">Détails de la commande</h3>
+                  <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium text-gray-900">{selectedOrder.product.name}</p>
+                        <p className="text-sm text-gray-500">{selectedOrder.size}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-500">Qté: {selectedOrder.quantity}</p>
+                      </div>
+                    </div>
+                    <div className="border-t pt-3 flex justify-between items-center">
+                      <div>
+                        <p className="text-sm text-gray-500">Mode de livraison</p>
+                        <p className="font-medium">{selectedOrder.deliveryMethod === 'pickup' ? 'Retrait sur place' : 'Livraison'}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-500">Paiement</p>
+                        <p className="font-medium">{selectedOrder.paymentMethod === 'interac' ? 'Interac' : 'Espèces'}</p>
+                      </div>
+                    </div>
+                    <div className="border-t pt-3 flex justify-between items-center">
+                      <p className="font-semibold text-lg">Total</p>
+                      <p className="font-bold text-xl text-presse-green">{selectedOrder.totalPrice.toFixed(2)}€</p>
+                    </div>
                   </div>
                 </div>
               </div>
