@@ -1,0 +1,116 @@
+// Prisma Schema pour Pressé Naturel
+// PostgreSQL sur Railway
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Utilisateurs (clients)
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  phone     String?
+  address   String?
+  city      String?
+  postalCode String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+}
+
+// Administrateurs
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+}
+
+// Produits (jus, shots, packs)
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  category    Category
+  ingredients String[]
+  benefits    String[]
+  image       String?
+  featured    Boolean  @default(false)
+  shotOnly    Boolean  @default(false)
+  packPrice   Float?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  orderItems  OrderItem[]
+}
+
+enum Category {
+  jus
+  shot
+  pack
+}
+
+// Commandes
+model Order {
+  id             String      @id @default(cuid())
+  orderNumber    String      @unique @default(cuid())
+  userId         String?
+  user           User?       @relation(fields: [userId], references: [id])
+  
+  // Info client (pour commandes sans compte)
+  customerFirstName String
+  customerLastName  String
+  customerEmail     String
+  customerPhone     String
+  customerAddress   String?
+  customerCity      String?
+  customerPostalCode String?
+  
+  items          OrderItem[]
+  totalPrice     Float
+  deliveryMethod DeliveryMethod
+  paymentMethod  PaymentMethod
+  notes          String?
+  status         OrderStatus @default(pending)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int
+  size      String   // 60ml, 350ml, 500ml
+  unitPrice Float
+}
+
+enum DeliveryMethod {
+  pickup
+  delivery
+}
+
+enum PaymentMethod {
+  interac
+  cash
+}
+
+enum OrderStatus {
+  pending
+  confirmed
+  preparing
+  ready
+  completed
+  cancelled
+}
