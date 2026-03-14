@@ -1,30 +1,19 @@
 import { Product, PriceBySize } from './types';
 
-const PRICES: PriceBySize = {
+interface ExtendedPrices {
+  '60ml': number;
+  '350ml': number;
+  '500ml': number;
+}
+
+const PRICES: ExtendedPrices = {
+  '60ml': 4,
   '350ml': 6,
   '500ml': 7,
 };
 
 export const PRODUCTS: Product[] = [
-  // Jus
-  {
-    id: 'citrus-boost',
-    name: 'Citrus Boost',
-    category: 'jus',
-    description: 'Un mélange vibrant d\'orange et de carotte pour un coup de pouce énergisant',
-    ingredients: ['Orange', 'Carotte'],
-    benefits: ['Vitamine C', 'Énergie', 'Antioxydants'],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'tropical-sunrise',
-    name: 'Tropical Sunrise',
-    category: 'jus',
-    description: 'L\'essence de la tropicale en chaque gorgée',
-    ingredients: ['Ananas', 'Orange', 'Carotte'],
-    benefits: ['Bromélaïne', 'Vitamine C', 'Énergie'],
-    createdAt: new Date().toISOString(),
-  },
+  // Jus - Incontournables en premier
   {
     id: 'golden-zest',
     name: 'Golden Zest',
@@ -32,6 +21,7 @@ export const PRODUCTS: Product[] = [
     description: 'Un mélange doré et épicé pour réveiller vos papilles',
     ingredients: ['Ananas', 'Gingembre', 'Citron'],
     benefits: ['Anti-inflammatoire', 'Digestion', 'Immunité'],
+    featured: true,
     createdAt: new Date().toISOString(),
   },
   {
@@ -41,6 +31,26 @@ export const PRODUCTS: Product[] = [
     description: 'Purifiant et revigorant pour une détoxification naturelle',
     ingredients: ['Épinard', 'Pomme verte', 'Citron'],
     benefits: ['Détoxification', 'Chlorophylle', 'Énergie'],
+    featured: true,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'citrus-boost',
+    name: 'Citrus Boost',
+    category: 'jus',
+    description: 'Un mélange vibrant d\'orange et de carotte pour un coup de pouce énergisant',
+    ingredients: ['Orange', 'Carotte'],
+    benefits: ['Vitamine C', 'Énergie', 'Antioxydants'],
+    featured: true,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'tropical-sunrise',
+    name: 'Tropical Sunrise',
+    category: 'jus',
+    description: 'L\'essence de la tropicale en chaque gorgée',
+    ingredients: ['Ananas', 'Orange', 'Carotte'],
+    benefits: ['Bromélaïne', 'Vitamine C', 'Énergie'],
     createdAt: new Date().toISOString(),
   },
   {
@@ -97,7 +107,7 @@ export const PRODUCTS: Product[] = [
     benefits: ['Curcumine', 'Anti-inflammatoire', 'Immune boost'],
     createdAt: new Date().toISOString(),
   },
-  // Shots Santé
+  // Shots Santé - Disponibles uniquement en 60ml
   {
     id: 'ginger-kick',
     name: 'Ginger Kick',
@@ -105,6 +115,7 @@ export const PRODUCTS: Product[] = [
     description: 'Un coup de poing du gingembre pour votre système immunitaire',
     ingredients: ['Gingembre', 'Citron'],
     benefits: ['Immunité', 'Digestion', 'Anti-nausée'],
+    shotOnly: true,
     createdAt: new Date().toISOString(),
   },
   {
@@ -114,6 +125,7 @@ export const PRODUCTS: Product[] = [
     description: 'Concentré de vitamine A et énergie',
     ingredients: ['Carotte', 'Gingembre', 'Citron'],
     benefits: ['Vision', 'Peau', 'Énergie'],
+    shotOnly: true,
     createdAt: new Date().toISOString(),
   },
   {
@@ -123,6 +135,7 @@ export const PRODUCTS: Product[] = [
     description: 'Chlorophylle et fraîcheur concentrée',
     ingredients: ['Concombre', 'Gingembre', 'Citron', 'Menthe'],
     benefits: ['Détoxification', 'Fraîcheur', 'Chlorophylle'],
+    shotOnly: true,
     createdAt: new Date().toISOString(),
   },
   {
@@ -132,6 +145,35 @@ export const PRODUCTS: Product[] = [
     description: 'L\'or liquide pour une santé optimale',
     ingredients: ['Curcuma', 'Gingembre', 'Citron'],
     benefits: ['Anti-inflammatoire', 'Antioxydants', 'Bien-être'],
+    shotOnly: true,
+    createdAt: new Date().toISOString(),
+  },
+  // Packs
+  {
+    id: 'pack-decouverte',
+    name: 'Pack Découverte',
+    category: 'pack',
+    description: 'Idéal pour découvrir nos saveurs : 4 jus variés pour explorer notre gamme',
+    ingredients: ['Golden Zest', 'Citrus Boost', 'Green Detox', 'Tropical Sunrise'],
+    benefits: ['Variété', 'Découverte', 'Économies'],
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'pack-energie',
+    name: 'Pack Énergie',
+    category: 'pack',
+    description: 'Pour un boost d\'énergie naturelle tout au long de la semaine',
+    ingredients: ['Citrus Boost', 'Tropical Sunrise', 'Golden Glow', 'Carrot Boost Shot'],
+    benefits: ['Énergie', 'Vitalité', 'Performance'],
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'pack-detox',
+    name: 'Pack Détox',
+    category: 'pack',
+    description: 'Une cure purifiante pour nettoyer votre organisme naturellement',
+    ingredients: ['Green Detox', 'Apple Zest', 'Fresh Oasis', 'Green Boost Shot'],
+    benefits: ['Détoxification', 'Légèreté', 'Bien-être'],
     createdAt: new Date().toISOString(),
   },
 ];
@@ -140,10 +182,21 @@ export function getProduct(id: string): Product | undefined {
   return PRODUCTS.find(p => p.id === id);
 }
 
-export function getProductsByCategory(category: 'jus' | 'shot'): Product[] {
+export function getProductsByCategory(category: 'jus' | 'shot' | 'pack'): Product[] {
   return PRODUCTS.filter(p => p.category === category);
 }
 
-export function getPrices(): PriceBySize {
+export function getFeaturedProducts(): Product[] {
+  return PRODUCTS.filter(p => p.featured === true);
+}
+
+export function getPrices(): ExtendedPrices {
   return PRICES;
+}
+
+export function getPackPrices() {
+  return {
+    '350ml': 22, // Pack de 4 jus 350ml
+    '500ml': 26, // Pack de 4 jus 500ml
+  };
 }

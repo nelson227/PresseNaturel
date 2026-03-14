@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FiMenu, FiX, FiShoppingCart } from 'react-icons/fi';
+import { FiMenu, FiX, FiShoppingCart, FiUser } from 'react-icons/fi';
 import { useState } from 'react';
 
 export default function Header() {
@@ -15,8 +15,8 @@ export default function Header() {
     { href: '/', label: 'Accueil' },
     { href: '/jus', label: 'Nos Jus' },
     { href: '/shots', label: 'Shots Santé' },
+    { href: '/packs', label: 'Packs' },
     { href: '/commander', label: 'Commander' },
-    { href: '/apropos', label: 'À propos' },
     { href: '/avis', label: 'Avis' },
     { href: '/contact', label: 'Contact' },
   ];
@@ -53,13 +53,22 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Cart Icon */}
-          <Link
-            href="/panier"
-            className="hidden sm:flex items-center text-presse-green hover:text-presse-dark transition-colors"
-          >
-            <FiShoppingCart size={24} />
-          </Link>
+          {/* Account & Cart Icons */}
+          <div className="hidden sm:flex items-center gap-4">
+            <Link
+              href="/compte"
+              className="flex items-center text-presse-dark hover:text-presse-green transition-colors"
+              title="Mon compte"
+            >
+              <FiUser size={22} />
+            </Link>
+            <Link
+              href="/panier"
+              className="flex items-center text-presse-green hover:text-presse-dark transition-colors"
+            >
+              <FiShoppingCart size={24} />
+            </Link>
+          </div>
 
           {/* Mobile Menu Button */}
           <button

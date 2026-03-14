@@ -1,23 +1,48 @@
 export interface Product {
   id: string;
   name: string;
-  category: 'jus' | 'shot';
+  category: 'jus' | 'shot' | 'pack';
   description: string;
   ingredients: string[];
   benefits: string[];
   image?: string;
+  shotOnly?: boolean; // Pour les produits disponibles uniquement en shot (60ml)
+  featured?: boolean; // Pour les incontournables
+  createdAt: string;
+}
+
+export interface CustomerInfo {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
   createdAt: string;
 }
 
 export interface OrderItem {
   productId: string;
   quantity: number;
-  size: '350ml' | '500ml';
+  size: '60ml' | '350ml' | '500ml';
   customization?: string;
 }
 
 export interface Order {
   id: string;
+  customer: CustomerInfo;
   items: OrderItem[];
   totalPrice: number;
   deliveryMethod: 'pickup' | 'delivery';
