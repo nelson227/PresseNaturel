@@ -81,7 +81,7 @@ export default function ProductCard({ product, featured = false }: ProductCardPr
                 {product.category === 'shot' || product.shotOnly ? (
                   <>60ml – 4$</>
                 ) : (
-                  <>À partir de 6$</>
+                  <>À partir de 9$</>
                 )}
               </span>
               <div className="text-presse-green group-hover:translate-x-1 transition-transform">
