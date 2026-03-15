@@ -25,12 +25,16 @@ export default function AdminLoginPage() {
     setError('');
     setIsSubmitting(true);
 
-    const result = adminLogin(email, password);
-    
-    if (result.success) {
-      router.push('/admin/dashboard');
-    } else {
-      setError(result.error || 'Erreur de connexion');
+    try {
+      const result = await adminLogin(email, password);
+      
+      if (result.success) {
+        router.push('/admin/dashboard');
+      } else {
+        setError(result.error || 'Erreur de connexion');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Erreur de connexion');
     }
 
     setIsSubmitting(false);

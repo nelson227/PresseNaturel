@@ -1,15 +1,12 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-// Identifiants admin
-const ADMIN_EMAIL = 'admin@pressenaturel.com';
-const ADMIN_PASSWORD = 'PresseAdmin2024!';
+import { adminAPI } from '@/lib/api';
 
 interface AdminContextType {
   isAdmin: boolean;
   isLoading: boolean;
-  adminLogin: (email: string, password: string) => { success: boolean; error?: string };
+  adminLogin: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   adminLogout: () => void;
 }
 
@@ -20,25 +17,28 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const adminSession = localStorage.getItem('presse_naturel_admin');
-    if (adminSession === 'authenticated') {
+    // Vérifier si un token admin valide existe
+    const token = localStorage.getItem('pn_admin_token');
+    if (token) {
       setIsAdmin(true);
     }
     setIsLoading(false);
   }, []);
 
-  const adminLogin = (email: string, password: string): { success: boolean; error?: string } => {
-    if (email.toLowerCase() === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+  const adminLogin = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      await adminAPI.login(email, password);
       setIsAdmin(true);
-      localStorage.setItem('presse_naturel_admin', 'authenticated');
       return { success: true };
+    } catch (error: any) {
+      console.error('Erreur connexion admin:', error);
+      return { success: false, error: error.message || 'Identifiants incorrects' };
     }
-    return { success: false, error: 'Identifiants incorrects' };
   };
 
   const adminLogout = () => {
     setIsAdmin(false);
-    localStorage.removeItem('presse_naturel_admin');
+    adminAPI.logout();
   };
 
   return (
