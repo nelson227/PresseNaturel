@@ -1,11 +1,13 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { Product, OrderStatus } from '@/lib/types';
 import { PRODUCTS as INITIAL_PRODUCTS } from '@/lib/products';
+import { productsAPI, adminAPI } from '@/lib/api';
 
 export interface Order {
   id: string;
+  orderNumber?: string;
   customer: {
     firstName: string;
     lastName: string;
@@ -32,12 +34,15 @@ export interface Order {
 interface DataContextType {
   products: Product[];
   orders: Order[];
-  addProduct: (product: Omit<Product, 'id' | 'createdAt'>) => void;
-  updateProduct: (id: string, updates: Partial<Product>) => void;
-  deleteProduct: (id: string) => void;
+  loading: boolean;
+  addProduct: (product: Omit<Product, 'id' | 'createdAt'>) => Promise<void>;
+  updateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
   addOrder: (order: Omit<Order, 'id' | 'createdAt' | 'status'>) => void;
-  updateOrderStatus: (id: string, status: Order['status']) => void;
+  updateOrderStatus: (id: string, status: Order['status']) => Promise<void>;
   getProductsByCategory: (category: 'jus' | 'shot' | 'pack') => Product[];
+  refreshProducts: () => Promise<void>;
+  refreshOrders: () => Promise<void>;
   getStats: () => {
     totalOrders: number;
     pendingOrders: number;
@@ -51,58 +56,136 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Charger les produits depuis l'API backend
+  const refreshProducts = useCallback(async () => {
+    try {
+      const response = await productsAPI.getAll();
+      if (response.products && response.products.length > 0) {
+        // Mapper les produits de l'API vers notre format
+        const mappedProducts = response.products.map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          description: p.description || '',
+          category: p.category,
+          ingredients: p.ingredients || [],
+          benefits: p.benefits || [],
+          image: p.image,
+          featured: p.featured || false,
+          createdAt: p.createdAt,
+        }));
+        setProducts(mappedProducts);
+      }
+    } catch (error) {
+      console.log('API non disponible, utilisation des données locales');
+      // Fallback: utiliser localStorage si l'API n'est pas disponible
+      const storedProducts = localStorage.getItem('presse_naturel_products');
+      if (storedProducts) {
+        setProducts(JSON.parse(storedProducts));
+      }
+    }
+  }, []);
+
+  // Charger les commandes depuis l'API backend (admin)
+  const refreshOrders = useCallback(async () => {
+    try {
+      const response = await adminAPI.getOrders() as any;
+      if (response.orders) {
+        const mappedOrders = response.orders.map((o: any) => ({
+          id: o.id,
+          orderNumber: o.orderNumber,
+          customer: {
+            firstName: o.firstName || o.customer?.firstName || '',
+            lastName: o.lastName || o.customer?.lastName || '',
+            email: o.email || o.customer?.email || '',
+            phone: o.phone || o.customer?.phone || '',
+            address: o.address || o.customer?.address,
+            city: o.city || o.customer?.city,
+            postalCode: o.postalCode || o.customer?.postalCode,
+          },
+          product: {
+            id: o.items?.[0]?.productId || '',
+            name: o.items?.[0]?.product?.name || 'Produit',
+          },
+          size: o.items?.[0]?.size || '350ml',
+          quantity: o.items?.[0]?.quantity || 1,
+          totalPrice: o.totalPrice || 0,
+          deliveryMethod: o.deliveryMethod || 'pickup',
+          paymentMethod: o.paymentMethod || 'interac',
+          notes: o.notes,
+          status: o.status,
+          createdAt: o.createdAt,
+        }));
+        setOrders(mappedOrders);
+      }
+    } catch (error) {
+      console.log('Admin API non disponible');
+      // Fallback localStorage
+      const storedOrders = localStorage.getItem('presse_naturel_orders');
+      if (storedOrders) {
+        setOrders(JSON.parse(storedOrders));
+      }
+    }
+  }, []);
 
   // Charger les données au démarrage
   useEffect(() => {
-    const storedProducts = localStorage.getItem('presse_naturel_products');
-    const storedOrders = localStorage.getItem('presse_naturel_orders');
-    
-    if (storedProducts) {
-      setProducts(JSON.parse(storedProducts));
-    } else {
-      setProducts(INITIAL_PRODUCTS);
-      localStorage.setItem('presse_naturel_products', JSON.stringify(INITIAL_PRODUCTS));
-    }
-    
-    if (storedOrders) {
-      setOrders(JSON.parse(storedOrders));
-    }
-    
-    setIsLoaded(true);
-  }, []);
-
-  // Sauvegarder les produits quand ils changent
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem('presse_naturel_products', JSON.stringify(products));
-    }
-  }, [products, isLoaded]);
-
-  // Sauvegarder les commandes quand elles changent
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem('presse_naturel_orders', JSON.stringify(orders));
-    }
-  }, [orders, isLoaded]);
-
-  const addProduct = (product: Omit<Product, 'id' | 'createdAt'>) => {
-    const newProduct: Product = {
-      ...product,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
+    const loadData = async () => {
+      setLoading(true);
+      await refreshProducts();
+      // Ne charger les commandes que si admin connecté
+      if (adminAPI.isAuthenticated()) {
+        await refreshOrders();
+      }
+      setLoading(false);
     };
-    setProducts(prev => [...prev, newProduct]);
+    loadData();
+  }, [refreshProducts, refreshOrders]);
+
+  // Ajouter un produit via API
+  const addProduct = async (product: Omit<Product, 'id' | 'createdAt'>) => {
+    try {
+      const response = await adminAPI.createProduct(product) as any;
+      if (response.product) {
+        setProducts(prev => [...prev, response.product]);
+      }
+    } catch (error) {
+      console.error('Erreur création produit:', error);
+      // Fallback local
+      const newProduct: Product = {
+        ...product,
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString(),
+      };
+      setProducts(prev => [...prev, newProduct]);
+    }
   };
 
-  const updateProduct = (id: string, updates: Partial<Product>) => {
-    setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+  // Modifier un produit via API
+  const updateProduct = async (id: string, updates: Partial<Product>) => {
+    try {
+      await adminAPI.updateProduct(id, updates);
+      setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+    } catch (error) {
+      console.error('Erreur mise à jour produit:', error);
+      // Mise à jour locale quand même
+      setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+    }
   };
 
-  const deleteProduct = (id: string) => {
-    setProducts(prev => prev.filter(p => p.id !== id));
+  // Supprimer un produit via API
+  const deleteProduct = async (id: string) => {
+    try {
+      await adminAPI.deleteProduct(id);
+      setProducts(prev => prev.filter(p => p.id !== id));
+    } catch (error) {
+      console.error('Erreur suppression produit:', error);
+      // Suppression locale quand même
+      setProducts(prev => prev.filter(p => p.id !== id));
+    }
   };
 
   const addOrder = (order: Omit<Order, 'id' | 'createdAt' | 'status'>) => {
@@ -115,8 +198,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setOrders(prev => [newOrder, ...prev]);
   };
 
-  const updateOrderStatus = (id: string, status: Order['status']) => {
-    setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
+  // Modifier le statut d'une commande via API
+  const updateOrderStatus = async (id: string, status: Order['status']) => {
+    try {
+      await adminAPI.updateOrderStatus(id, status);
+      setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
+    } catch (error) {
+      console.error('Erreur mise à jour statut:', error);
+      setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
+    }
   };
 
   const getProductsByCategory = (category: 'jus' | 'shot' | 'pack') => {
@@ -141,12 +231,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
     <DataContext.Provider value={{
       products,
       orders,
+      loading,
       addProduct,
       updateProduct,
       deleteProduct,
       addOrder,
       updateOrderStatus,
       getProductsByCategory,
+      refreshProducts,
+      refreshOrders,
       getStats,
     }}>
       {children}
