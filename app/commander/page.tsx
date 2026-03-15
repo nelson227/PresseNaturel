@@ -148,7 +148,7 @@ export default function CommanderPage() {
       };
 
       // Récupérer le token utilisateur
-      const userToken = localStorage.getItem('presse_naturel_user_token');
+      const userToken = localStorage.getItem('presse_naturel_token');
 
       // Envoyer la commande au backend
       const response = await fetch(`${API_URL}/orders`, {

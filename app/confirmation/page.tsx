@@ -66,7 +66,8 @@ function ConfirmationContent() {
           throw new Error('Commande non trouvée');
         }
 
-        const order = await response.json();
+        const data = await response.json();
+        const order = data.order;
 
         // Transformer les données du backend au format attendu
         const orderDate = new Date(order.createdAt).toLocaleDateString('fr-CA', {
@@ -80,7 +81,7 @@ function ConfirmationContent() {
           orderDate,
           items: order.items.map((item: any) => ({
             productId: item.productId,
-            name: item.productName,
+            name: item.product?.name || 'Produit',
             size: item.size,
             quantity: item.quantity,
             price: item.unitPrice,
@@ -94,9 +95,9 @@ function ConfirmationContent() {
             lastName: order.customerLastName,
             email: order.customerEmail,
             phone: order.customerPhone,
-            address: order.deliveryAddress || '',
-            city: order.deliveryCity || '',
-            postalCode: order.deliveryPostalCode || '',
+            address: order.customerAddress || '',
+            city: order.customerCity || '',
+            postalCode: order.customerPostalCode || '',
           },
         };
 

@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://pressenaturel-production.up.railway.app/api';
+
 export interface User {
   id: string;
   email: string;
@@ -39,89 +41,91 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Charger l'utilisateur depuis localStorage au démarrage
+  // Charger l'utilisateur depuis le token au démarrage
   useEffect(() => {
-    const storedUser = localStorage.getItem('presse_naturel_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
+    const loadUser = async () => {
+      const token = localStorage.getItem('presse_naturel_token');
+      if (token) {
+        try {
+          const response = await fetch(`${API_URL}/auth/me`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setUser(data.user);
+          } else {
+            // Token invalide, le supprimer
+            localStorage.removeItem('presse_naturel_token');
+          }
+        } catch (error) {
+          console.error('Erreur chargement profil:', error);
+        }
+      }
+      setIsLoading(false);
+    };
+    loadUser();
   }, []);
 
-  // Connexion
+  // Connexion via API backend
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
-      // Récupérer les utilisateurs stockés
-      const usersData = localStorage.getItem('presse_naturel_users');
-      const users: { [email: string]: { user: User; password: string } } = usersData ? JSON.parse(usersData) : {};
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-      // Vérifier si l'utilisateur existe
-      const userData = users[email.toLowerCase()];
-      if (!userData) {
-        return { success: false, error: 'Aucun compte trouvé avec cet email' };
+      const data = await response.json();
+
+      if (!response.ok) {
+        return { success: false, error: data.error || 'Erreur de connexion' };
       }
 
-      // Vérifier le mot de passe
-      if (userData.password !== password) {
-        return { success: false, error: 'Mot de passe incorrect' };
-      }
-
-      // Connexion réussie
-      setUser(userData.user);
-      localStorage.setItem('presse_naturel_user', JSON.stringify(userData.user));
+      // Stocker le token et l'utilisateur
+      localStorage.setItem('presse_naturel_token', data.token);
+      setUser(data.user);
       
       return { success: true };
     } catch (error) {
-      return { success: false, error: 'Erreur lors de la connexion' };
+      return { success: false, error: 'Erreur réseau lors de la connexion' };
     }
   };
 
-  // Inscription
+  // Inscription via API backend
   const register = async (userData: RegisterData): Promise<{ success: boolean; error?: string }> => {
     try {
-      // Récupérer les utilisateurs existants
-      const usersData = localStorage.getItem('presse_naturel_users');
-      const users: { [email: string]: { user: User; password: string } } = usersData ? JSON.parse(usersData) : {};
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
 
-      // Vérifier si l'email existe déjà
-      if (users[userData.email.toLowerCase()]) {
-        return { success: false, error: 'Un compte existe déjà avec cet email' };
+      const data = await response.json();
+
+      if (!response.ok) {
+        return { success: false, error: data.error || 'Erreur lors de l\'inscription' };
       }
 
-      // Créer le nouvel utilisateur
-      const newUser: User = {
-        id: Date.now().toString(),
-        email: userData.email.toLowerCase(),
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        phone: userData.phone,
-        address: userData.address,
-        city: userData.city,
-        postalCode: userData.postalCode,
-        createdAt: new Date().toISOString(),
-      };
-
-      // Sauvegarder l'utilisateur
-      users[userData.email.toLowerCase()] = {
-        user: newUser,
-        password: userData.password,
-      };
-      localStorage.setItem('presse_naturel_users', JSON.stringify(users));
-
-      // Connecter automatiquement
-      setUser(newUser);
-      localStorage.setItem('presse_naturel_user', JSON.stringify(newUser));
+      // Stocker le token et connecter automatiquement
+      localStorage.setItem('presse_naturel_token', data.token);
+      setUser(data.user);
 
       return { success: true };
     } catch (error) {
-      return { success: false, error: 'Erreur lors de l\'inscription' };
+      return { success: false, error: 'Erreur réseau lors de l\'inscription' };
     }
   };
 
   // Déconnexion
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('presse_naturel_user');
+    localStorage.removeItem('presse_naturel_token');
   };
 
   return (

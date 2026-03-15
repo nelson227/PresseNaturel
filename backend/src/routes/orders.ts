@@ -95,32 +95,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Récupérer une commande par numéro
-router.get('/:orderNumber', async (req, res) => {
-  try {
-    const { orderNumber } = req.params;
-
-    const order = await prisma.order.findUnique({
-      where: { orderNumber },
-      include: {
-        items: {
-          include: { product: true },
-        },
-      },
-    });
-
-    if (!order) {
-      return res.status(404).json({ error: 'Commande non trouvée' });
-    }
-
-    res.json({ order });
-  } catch (error) {
-    console.error('Erreur récupération commande:', error);
-    res.status(500).json({ error: 'Erreur lors de la récupération' });
-  }
-});
-
-// Historique des commandes d'un utilisateur connecté
+// Historique des commandes d'un utilisateur connecté (DOIT être AVANT /:orderNumber)
 router.get('/user/history', async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
@@ -148,7 +123,32 @@ router.get('/user/history', async (req, res) => {
     res.json({ orders });
   } catch (error) {
     console.error('Erreur historique:', error);
-    res.status(401).json({ error: 'Token invalide' });
+    res.status(500).json({ error: 'Erreur lors de la récupération' });
+  }
+});
+
+// Récupérer une commande par numéro
+router.get('/:orderNumber', async (req, res) => {
+  try {
+    const { orderNumber } = req.params;
+
+    const order = await prisma.order.findUnique({
+      where: { orderNumber },
+      include: {
+        items: {
+          include: { product: true },
+        },
+      },
+    });
+
+    if (!order) {
+      return res.status(404).json({ error: 'Commande non trouvée' });
+    }
+
+    res.json({ order });
+  } catch (error) {
+    console.error('Erreur récupération commande:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération' });
   }
 });
 

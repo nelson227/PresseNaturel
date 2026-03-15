@@ -83,11 +83,11 @@ export default function ComptePage() {
         if (response.ok) {
           const data = await response.json();
           // Transformer les données du backend au format attendu
-          const transformedOrders: Order[] = data.map((order: any) => ({
+          const transformedOrders: Order[] = (data.orders || []).map((order: any) => ({
             id: order.orderNumber,
             date: order.createdAt,
             items: order.items.map((item: any) => ({
-              name: item.productName,
+              name: item.product?.name || 'Produit',
               quantity: item.quantity,
               price: item.unitPrice,
               size: item.size,
