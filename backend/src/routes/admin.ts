@@ -4,18 +4,25 @@ import jwt from 'jsonwebtoken';
 import { prisma } from '../db.js';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
+
+// Fonction pour obtenir le secret JWT (évalué à chaque appel)
+const getJwtSecret = () => process.env.JWT_SECRET || 'default-secret';
 
 // Middleware pour vérifier l'admin
 const requireAdmin = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('❌ Auth: Token manquant');
       return res.status(401).json({ error: 'Token manquant' });
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, JWT_SECRET) as { adminId: string; type: string };
+    const secret = getJwtSecret();
+    console.log('🔐 JWT Secret utilisé (premiers 10 chars):', secret.substring(0, 10) + '...');
+    
+    const decoded = jwt.verify(token, secret) as { adminId: string; type: string };
+    console.log('✅ Token décodé:', { adminId: decoded.adminId, type: decoded.type });
 
     if (decoded.type !== 'admin') {
       return res.status(403).json({ error: 'Accès réservé aux administrateurs' });
@@ -23,12 +30,14 @@ const requireAdmin = async (req: Request, res: Response, next: NextFunction) => 
 
     const admin = await prisma.admin.findUnique({ where: { id: decoded.adminId } });
     if (!admin) {
+      console.log('❌ Admin non trouvé pour ID:', decoded.adminId);
       return res.status(403).json({ error: 'Administrateur non trouvé' });
     }
 
     (req as any).admin = admin;
     next();
-  } catch (error) {
+  } catch (error: any) {
+    console.log('❌ Erreur vérification token:', error.message);
     res.status(401).json({ error: 'Token invalide' });
   }
 };
@@ -48,7 +57,9 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
     }
 
-    const token = jwt.sign({ adminId: admin.id, type: 'admin' }, JWT_SECRET, { expiresIn: '24h' });
+    const secret = getJwtSecret();
+    console.log('🔐 Login - JWT Secret utilisé (premiers 10 chars):', secret.substring(0, 10) + '...');
+    const token = jwt.sign({ adminId: admin.id, type: 'admin' }, secret, { expiresIn: '24h' });
 
     res.json({
       admin: {
