@@ -6,10 +6,13 @@ import Image from 'next/image';
 import { FiMenu, FiX, FiShoppingCart, FiUser, FiLogOut } from 'react-icons/fi';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, logout } = useAuth();
+  const { getItemCount } = useCart();
+  const itemCount = getItemCount();
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -85,10 +88,15 @@ export default function Header() {
               </Link>
             )}
             <Link
-              href="/panier"
-              className="flex items-center text-presse-green hover:text-presse-dark transition-colors"
+              href="/commander"
+              className="relative flex items-center text-presse-green hover:text-presse-dark transition-colors"
             >
               <FiShoppingCart size={24} />
+              {itemCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-presse-orange text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {itemCount > 99 ? '99+' : itemCount}
+                </span>
+              )}
             </Link>
           </div>
 

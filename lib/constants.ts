@@ -1,5 +1,20 @@
 // Configuration constants pour le site
 
+export const PRICES = {
+  '60ml': 4,
+  '350ml': 9,
+  '500ml': 11,
+  shot: 4,
+  jus: {
+    '350ml': 9,
+    '500ml': 11
+  },
+  pack: {
+    '350ml': 22,
+    '500ml': 26
+  }
+};
+
 export const SITE_CONFIG = {
   name: 'Pressé Naturel',
   description: 'Des jus naturels, pressés avec passion. 100% fruits et légumes – 0% compromis.',
