@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import { useData } from '@/contexts/DataContext';
+import ImageUpload from '@/components/ImageUpload';
 import { FiPlus, FiEdit2, FiTrash2, FiX, FiSave, FiPackage } from 'react-icons/fi';
 import { Product } from '@/lib/types';
 
@@ -18,6 +19,7 @@ export default function AdminPacksPage() {
     contents: '',
     benefits: '',
     packPrice: 22,
+    image: undefined as string | undefined,
   });
 
   const openAddModal = () => {
@@ -28,6 +30,7 @@ export default function AdminPacksPage() {
       contents: '',
       benefits: '',
       packPrice: 22,
+      image: undefined,
     });
     setIsModalOpen(true);
   };
@@ -40,6 +43,7 @@ export default function AdminPacksPage() {
       contents: product.ingredients.join(', '),
       benefits: product.benefits.join(', '),
       packPrice: product.packPrice || 22,
+      image: product.image,
     });
     setIsModalOpen(true);
   };
@@ -54,6 +58,7 @@ export default function AdminPacksPage() {
       benefits: formData.benefits.split(',').map(b => b.trim()).filter(b => b),
       category: 'pack' as const,
       packPrice: formData.packPrice,
+      image: formData.image,
     };
 
     if (editingProduct) {
@@ -108,7 +113,11 @@ export default function AdminPacksPage() {
           {packs.map((product) => (
             <div key={product.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
               <div className={`aspect-video bg-gradient-to-br ${getPackGradient(product.name)} flex items-center justify-center relative`}>
-                <span className="text-6xl">{getPackEmoji(product.name)}</span>
+                {product.image ? (
+                  <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-6xl">{getPackEmoji(product.name)}</span>
+                )}
                 <span className="absolute top-2 right-2 bg-presse-green text-white text-sm font-bold px-3 py-1 rounded-full">
                   {product.packPrice || 22}$
                 </span>
@@ -186,6 +195,12 @@ export default function AdminPacksPage() {
               </div>
               
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <ImageUpload
+                  value={formData.image}
+                  onChange={(image) => setFormData({ ...formData, image })}
+                  maxSizeMB={10}
+                />
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Nom du pack *

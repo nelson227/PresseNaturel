@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import { useData } from '@/contexts/DataContext';
+import ImageUpload from '@/components/ImageUpload';
 import { FiPlus, FiEdit2, FiTrash2, FiX, FiSave } from 'react-icons/fi';
 import { Product } from '@/lib/types';
 
@@ -17,6 +18,7 @@ export default function AdminShotsPage() {
     description: '',
     ingredients: '',
     benefits: '',
+    image: undefined as string | undefined,
   });
 
   const openAddModal = () => {
@@ -26,6 +28,7 @@ export default function AdminShotsPage() {
       description: '',
       ingredients: '',
       benefits: '',
+      image: undefined,
     });
     setIsModalOpen(true);
   };
@@ -37,6 +40,7 @@ export default function AdminShotsPage() {
       description: product.description,
       ingredients: product.ingredients.join(', '),
       benefits: product.benefits.join(', '),
+      image: product.image,
     });
     setIsModalOpen(true);
   };
@@ -51,6 +55,7 @@ export default function AdminShotsPage() {
       benefits: formData.benefits.split(',').map(b => b.trim()).filter(b => b),
       category: 'shot' as const,
       shotOnly: true,
+      image: formData.image,
     };
 
     if (editingProduct) {
@@ -98,7 +103,11 @@ export default function AdminShotsPage() {
           {shots.map((product) => (
             <div key={product.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
               <div className="aspect-video bg-gradient-to-br from-red-100 to-orange-100 flex items-center justify-center relative">
-                <span className="text-6xl">⚡</span>
+                {product.image ? (
+                  <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-6xl">⚡</span>
+                )}
                 <span className="absolute top-2 right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded">
                   60ml • 4$
                 </span>
@@ -176,6 +185,12 @@ export default function AdminShotsPage() {
               </div>
               
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <ImageUpload
+                  value={formData.image}
+                  onChange={(image) => setFormData({ ...formData, image })}
+                  maxSizeMB={10}
+                />
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Nom du shot *
