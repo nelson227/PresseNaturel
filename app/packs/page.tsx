@@ -5,9 +5,11 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Button from '@/components/Button';
 import Link from 'next/link';
-import { getProductsByCategory, getPackPrices } from '@/lib/products';
+import { useData } from '@/contexts/DataContext';
+import { getPackPrices } from '@/lib/products';
 
 export default function PacksPage() {
+  const { getProductsByCategory } = useData();
   const packs = getProductsByCategory('pack');
   const packPrices = getPackPrices();
 

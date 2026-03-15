@@ -8,12 +8,13 @@ import ProductCard from '@/components/ProductCard';
 import TestimonialCarousel from '@/components/TestimonialCarousel';
 import Feature from '@/components/Feature';
 import Button from '@/components/Button';
-import { PRODUCTS } from '@/lib/products';
+import { useData } from '@/contexts/DataContext';
 import { getTestimonials } from '@/lib/testimonials';
 import { FiArrowRight } from 'react-icons/fi';
 
 export default function Home() {
-  const featuredProducts = PRODUCTS.slice(0, 4);
+  const { products } = useData();
+  const featuredProducts = products.filter(p => p.featured).slice(0, 4);
   const testimonials = getTestimonials();
 
   return (

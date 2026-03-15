@@ -4,9 +4,10 @@ import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
-import { getProductsByCategory, getFeaturedProducts } from '@/lib/products';
+import { useData } from '@/contexts/DataContext';
 
 export default function JusPage() {
+  const { getProductsByCategory } = useData();
   const allJus = getProductsByCategory('jus');
   const featuredJus = allJus.filter(j => j.featured);
   const otherJus = allJus.filter(j => !j.featured);

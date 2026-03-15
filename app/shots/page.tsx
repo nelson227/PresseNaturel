@@ -4,9 +4,10 @@ import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
-import { getProductsByCategory } from '@/lib/products';
+import { useData } from '@/contexts/DataContext';
 
 export default function ShotsPage() {
+  const { getProductsByCategory } = useData();
   const shots = getProductsByCategory('shot');
 
   return (

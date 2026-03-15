@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Button from '@/components/Button';
-import { PRODUCTS, getPrices, getProduct } from '@/lib/products';
+import { useData } from '@/contexts/DataContext';
+import { getPrices } from '@/lib/products';
 
 export default function CommanderPage() {
   const router = useRouter();
+  const { products } = useData();
   const [selectedProduct, setSelectedProduct] = useState('');
   const [size, setSize] = useState<'60ml' | '350ml' | '500ml'>('350ml');
   const [quantity, setQuantity] = useState('1');
@@ -26,8 +28,8 @@ export default function CommanderPage() {
   const [postalCode, setPostalCode] = useState('');
 
   const prices = getPrices();
-  const selectedProductData = getProduct(selectedProduct);
-  const isShot = selectedProductData?.shotOnly || selectedProductData?.category === 'shot';
+  const selectedProductData = products.find(p => p.id === selectedProduct);
+  const isShot = selectedProductData?.category === 'shot';
   
   // Ajuster la taille si c'est un shot
   useEffect(() => {
@@ -181,14 +183,14 @@ export default function CommanderPage() {
                   >
                     <option value="">-- Choisir un produit --</option>
                     <optgroup label="Jus">
-                      {PRODUCTS.filter(p => p.category === 'jus').map((product) => (
+                      {products.filter(p => p.category === 'jus').map((product) => (
                         <option key={product.id} value={product.id}>
                           {product.name}
                         </option>
                       ))}
                     </optgroup>
                     <optgroup label="Shots (60ml uniquement)">
-                      {PRODUCTS.filter(p => p.category === 'shot').map((product) => (
+                      {products.filter(p => p.category === 'shot').map((product) => (
                         <option key={product.id} value={product.id}>
                           {product.name} (Shot 60ml)
                         </option>
@@ -424,7 +426,7 @@ export default function CommanderPage() {
                 {selectedProduct && (
                   <div className="space-y-4 border-b border-presse-green-light pb-4 mb-4">
                     <p className="text-sm text-presse-dark">
-                      <strong>Produit:</strong> {PRODUCTS.find(p => p.id === selectedProduct)?.name}
+                      <strong>Produit:</strong> {products.find(p => p.id === selectedProduct)?.name}
                     </p>
                     <p className="text-sm text-presse-dark">
                       <strong>Taille:</strong> {size}
