@@ -20,13 +20,23 @@ export default function ProductCard({ product, featured = false }: ProductCardPr
         <div className="bg-presse-beige rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow">
           {/* Image Container */}
           <div className="relative aspect-square bg-gradient-to-br from-presse-green-light to-presse-beige overflow-hidden">
-            <div className="absolute inset-0 bg-presse-green-light opacity-20 group-hover:opacity-40 transition-opacity" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-6xl mb-2">🥤</div>
-                <p className="text-sm text-presse-green font-inter">{product.name}</p>
-              </div>
-            </div>
+            {product.image ? (
+              <img 
+                src={product.image} 
+                alt={product.name} 
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            ) : (
+              <>
+                <div className="absolute inset-0 bg-presse-green-light opacity-20 group-hover:opacity-40 transition-opacity" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-6xl mb-2">{product.category === 'shot' ? '⚡' : '🥤'}</div>
+                    <p className="text-sm text-presse-green font-inter">{product.name}</p>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Content */}
