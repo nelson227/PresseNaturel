@@ -13,7 +13,27 @@ const PRICES: ExtendedPrices = {
 };
 
 export const PRODUCTS: Product[] = [
-  // Jus - Incontournables en premier
+  // ============ JUS ============
+  {
+    id: 'citrus-boost',
+    name: 'Citrus Boost',
+    category: 'jus',
+    description: 'Un mélange vibrant d\'orange et de carotte pour un coup de pouce énergisant',
+    ingredients: ['Orange', 'Carotte'],
+    benefits: ['Vitamine C', 'Énergie', 'Antioxydants'],
+    featured: true,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'tropical-sunrise',
+    name: 'Tropical Sunrise',
+    category: 'jus',
+    description: 'L\'essence tropicale en chaque gorgée, parfait pour commencer la journée',
+    ingredients: ['Ananas', 'Orange', 'Carotte'],
+    benefits: ['Bromélaïne', 'Vitamine C', 'Énergie'],
+    featured: true,
+    createdAt: new Date().toISOString(),
+  },
   {
     id: 'golden-zest',
     name: 'Golden Zest',
@@ -31,26 +51,7 @@ export const PRODUCTS: Product[] = [
     description: 'Purifiant et revigorant pour une détoxification naturelle',
     ingredients: ['Épinard', 'Pomme verte', 'Citron'],
     benefits: ['Détoxification', 'Chlorophylle', 'Énergie'],
-    featured: true,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'citrus-boost',
-    name: 'Citrus Boost',
-    category: 'jus',
-    description: 'Un mélange vibrant d\'orange et de carotte pour un coup de pouce énergisant',
-    ingredients: ['Orange', 'Carotte'],
-    benefits: ['Vitamine C', 'Énergie', 'Antioxydants'],
-    featured: true,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'tropical-sunrise',
-    name: 'Tropical Sunrise',
-    category: 'jus',
-    description: 'L\'essence de la tropicale en chaque gorgée',
-    ingredients: ['Ananas', 'Orange', 'Carotte'],
-    benefits: ['Bromélaïne', 'Vitamine C', 'Énergie'],
+    featured: false,
     createdAt: new Date().toISOString(),
   },
   {
@@ -60,6 +61,7 @@ export const PRODUCTS: Product[] = [
     description: 'L\'harmonie parfaite entre douceur et fraîcheur',
     ingredients: ['Orange', 'Pomme', 'Carotte'],
     benefits: ['Vitamine A', 'Vitamine C', 'Sucres naturels'],
+    featured: false,
     createdAt: new Date().toISOString(),
   },
   {
@@ -68,7 +70,8 @@ export const PRODUCTS: Product[] = [
     category: 'jus',
     description: 'Traditionnel et exotique, une saveur unique africaine',
     ingredients: ['Fleur d\'hibiscus', 'Ananas', 'Sucre'],
-    benefits: ['Antioxydants', 'Riche en minéraux', 'Goût unique'],
+    benefits: ['Antioxydants', 'Riche en minéraux', 'Rafraîchissant'],
+    featured: false,
     createdAt: new Date().toISOString(),
   },
   {
@@ -78,6 +81,7 @@ export const PRODUCTS: Product[] = [
     description: 'Frais, léger et hydratant comme une oasis du désert',
     ingredients: ['Pastèque', 'Menthe', 'Citron'],
     benefits: ['Hydratation', 'Fraîcheur', 'Légèreté'],
+    featured: false,
     createdAt: new Date().toISOString(),
   },
   {
@@ -87,6 +91,7 @@ export const PRODUCTS: Product[] = [
     description: 'Croquant, acidulé et légèrement épicé',
     ingredients: ['Pomme verte', 'Gingembre', 'Citron'],
     benefits: ['Fibres', 'Anti-inflammatoire', 'Digestion'],
+    featured: false,
     createdAt: new Date().toISOString(),
   },
   {
@@ -96,59 +101,63 @@ export const PRODUCTS: Product[] = [
     description: 'Un puissant élixir de santé à base de racines',
     ingredients: ['Betterave', 'Carotte', 'Pomme', 'Gingembre', 'Citron'],
     benefits: ['Fer', 'Énergie', 'Circulation'],
+    featured: false,
     createdAt: new Date().toISOString(),
   },
   {
     id: 'golden-glow',
     name: 'Golden Glow',
     category: 'jus',
-    description: 'Lumineux et anti-inflammatoire avec la puissance du curcuma',
+    description: 'Un boost doré anti-inflammatoire pour votre bien-être',
     ingredients: ['Ananas', 'Curcuma', 'Citron'],
-    benefits: ['Curcumine', 'Anti-inflammatoire', 'Immune boost'],
+    benefits: ['Anti-inflammatoire', 'Antioxydants', 'Digestion'],
+    featured: false,
     createdAt: new Date().toISOString(),
   },
-  // Shots Santé - Disponibles uniquement en 60ml
+
+  // ============ SHOTS ============
   {
     id: 'ginger-kick',
     name: 'Ginger Kick',
     category: 'shot',
-    description: 'Un coup de poing du gingembre pour votre système immunitaire',
+    description: 'Un shot puissant au gingembre pour booster votre immunité',
     ingredients: ['Gingembre', 'Citron'],
-    benefits: ['Immunité', 'Digestion', 'Anti-nausée'],
-    shotOnly: true,
+    benefits: ['Immunité', 'Anti-inflammatoire', 'Digestion'],
+    featured: true,
     createdAt: new Date().toISOString(),
   },
   {
     id: 'carrot-boost',
     name: 'Carrot Boost',
     category: 'shot',
-    description: 'Concentré de vitamine A et énergie',
+    description: 'Concentré de carotte épicé pour la vue et l\'énergie',
     ingredients: ['Carotte', 'Gingembre', 'Citron'],
-    benefits: ['Vision', 'Peau', 'Énergie'],
-    shotOnly: true,
+    benefits: ['Vitamine A', 'Énergie', 'Vision'],
+    featured: false,
     createdAt: new Date().toISOString(),
   },
   {
     id: 'green-boost',
     name: 'Green Boost',
     category: 'shot',
-    description: 'Chlorophylle et fraîcheur concentrée',
+    description: 'Fraîcheur et vitalité en un shot vert',
     ingredients: ['Concombre', 'Gingembre', 'Citron', 'Menthe'],
-    benefits: ['Détoxification', 'Fraîcheur', 'Chlorophylle'],
-    shotOnly: true,
+    benefits: ['Hydratation', 'Fraîcheur', 'Détox'],
+    featured: false,
     createdAt: new Date().toISOString(),
   },
   {
     id: 'turmeric-power',
     name: 'Turmeric Power',
     category: 'shot',
-    description: 'L\'or liquide pour une santé optimale',
+    description: 'Le pouvoir du curcuma pour votre santé',
     ingredients: ['Curcuma', 'Gingembre', 'Citron'],
-    benefits: ['Anti-inflammatoire', 'Antioxydants', 'Bien-être'],
-    shotOnly: true,
+    benefits: ['Anti-inflammatoire', 'Antioxydants', 'Immunité'],
+    featured: false,
     createdAt: new Date().toISOString(),
   },
-  // Packs
+
+  // ============ PACKS ============
   {
     id: 'pack-decouverte',
     name: 'Pack Découverte',
@@ -156,6 +165,7 @@ export const PRODUCTS: Product[] = [
     description: 'Idéal pour découvrir nos saveurs : 4 jus variés pour explorer notre gamme',
     ingredients: ['Golden Zest', 'Citrus Boost', 'Green Detox', 'Tropical Sunrise'],
     benefits: ['Variété', 'Découverte', 'Économies'],
+    packPrice: 22,
     createdAt: new Date().toISOString(),
   },
   {
@@ -165,6 +175,7 @@ export const PRODUCTS: Product[] = [
     description: 'Pour un boost d\'énergie naturelle tout au long de la semaine',
     ingredients: ['Citrus Boost', 'Tropical Sunrise', 'Golden Glow', 'Carrot Boost Shot'],
     benefits: ['Énergie', 'Vitalité', 'Performance'],
+    packPrice: 22,
     createdAt: new Date().toISOString(),
   },
   {
@@ -174,6 +185,7 @@ export const PRODUCTS: Product[] = [
     description: 'Une cure purifiante pour nettoyer votre organisme naturellement',
     ingredients: ['Green Detox', 'Apple Zest', 'Fresh Oasis', 'Green Boost Shot'],
     benefits: ['Détoxification', 'Légèreté', 'Bien-être'],
+    packPrice: 22,
     createdAt: new Date().toISOString(),
   },
 ];
