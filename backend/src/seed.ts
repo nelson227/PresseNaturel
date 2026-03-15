@@ -1,8 +1,9 @@
 import bcrypt from 'bcryptjs';
 import { prisma } from './db.js';
 
-// Produits initiaux
+// Produits initiaux - Catalogue complet Pressé Naturel
 const initialProducts = [
+  // ============ JUS (10 produits) ============
   {
     name: 'Citrus Boost',
     description: 'Un mélange énergisant d\'agrumes frais pour bien démarrer la journée',
@@ -12,89 +13,141 @@ const initialProducts = [
     featured: true,
   },
   {
+    name: 'Tropical Sunrise',
+    description: 'Évadez-vous sous les tropiques avec ce mélange exotique ensoleillé',
+    category: 'jus' as const,
+    ingredients: ['Mangue', 'Ananas', 'Fruit de la passion', 'Coco'],
+    benefits: ['Vitamines A & C', 'Antioxydants', 'Bonne humeur'],
+    featured: true,
+  },
+  {
+    name: 'Golden Zest',
+    description: 'Un mélange doré plein de vitalité et de saveurs acidulées',
+    category: 'jus' as const,
+    ingredients: ['Orange', 'Citron', 'Curcuma', 'Miel'],
+    benefits: ['Anti-inflammatoire', 'Digestion', 'Éclat'],
+    featured: true,
+  },
+  {
     name: 'Green Detox',
     description: 'Purifiez votre corps avec ce jus vert riche en nutriments',
     category: 'jus' as const,
     ingredients: ['Épinard', 'Concombre', 'Céleri', 'Pomme verte', 'Citron'],
-    benefits: ['Détox', 'Hydratation', 'Antioxydants'],
+    benefits: ['Détoxification', 'Hydratation', 'Chlorophylle'],
     featured: true,
   },
   {
-    name: 'Tropical Paradise',
-    description: 'Évadez-vous sous les tropiques avec ce mélange exotique',
+    name: 'Sunny Blend',
+    description: 'Un rayon de soleil dans votre verre, sucré et vitaminé',
     category: 'jus' as const,
-    ingredients: ['Ananas', 'Mangue', 'Fruit de la passion', 'Coco'],
-    benefits: ['Vitamines', 'Digestion', 'Bien-être'],
-    featured: true,
+    ingredients: ['Orange', 'Carotte', 'Pomme', 'Gingembre'],
+    benefits: ['Vitamines A & C', 'Énergie', 'Vision'],
+    featured: false,
   },
   {
-    name: 'Carrot Sunrise',
-    description: 'Le plein de bêta-carotène pour une peau éclatante',
+    name: 'Bissap',
+    description: 'La boisson traditionnelle africaine aux fleurs d\'hibiscus',
     category: 'jus' as const,
+    ingredients: ['Hibiscus', 'Menthe', 'Vanille', 'Sucre de canne'],
+    benefits: ['Antioxydants', 'Rafraîchissant', 'Tradition'],
+    featured: false,
+  },
+  {
+    name: 'Fresh Oasis',
+    description: 'Une oasis de fraîcheur pour les journées chaudes',
+    category: 'jus' as const,
+    ingredients: ['Concombre', 'Menthe', 'Citron vert', 'Aloe vera'],
+    benefits: ['Hydratation', 'Fraîcheur', 'Digestion'],
+    featured: false,
+  },
+  {
+    name: 'Apple Zest',
+    description: 'Le croquant de la pomme avec une touche de peps',
+    category: 'jus' as const,
+    ingredients: ['Pomme verte', 'Pomme rouge', 'Citron', 'Cannelle'],
+    benefits: ['Fibres', 'Énergie', 'Antioxydants'],
+    featured: false,
+  },
+  {
+    name: 'Red Roots',
+    description: 'La puissance des légumes racines pour un boost naturel',
+    category: 'jus' as const,
+    ingredients: ['Betterave', 'Carotte', 'Gingembre', 'Pomme'],
+    benefits: ['Fer', 'Endurance', 'Circulation'],
+    featured: false,
+  },
+  {
+    name: 'Golden Glow',
+    description: 'Lumineux et anti-inflammatoire avec la puissance du curcuma',
+    category: 'jus' as const,
+    ingredients: ['Ananas', 'Curcuma', 'Citron', 'Poivre noir'],
+    benefits: ['Curcumine', 'Anti-inflammatoire', 'Immune boost'],
+    featured: false,
+  },
+  // ============ SHOTS SANTÉ (4 produits) ============
+  {
+    name: 'Ginger Kick',
+    description: 'Un coup de poing de gingembre pour booster votre immunité',
+    category: 'shot' as const,
+    ingredients: ['Gingembre', 'Citron', 'Miel'],
+    benefits: ['Immunité', 'Digestion', 'Anti-nausée'],
+    shotOnly: true,
+  },
+  {
+    name: 'Carrot Boost',
+    description: 'Concentré de bêta-carotène pour une peau éclatante',
+    category: 'shot' as const,
     ingredients: ['Carotte', 'Orange', 'Gingembre', 'Curcuma'],
     benefits: ['Vision', 'Peau', 'Anti-inflammatoire'],
-    featured: false,
-  },
-  {
-    name: 'Berry Blast',
-    description: 'Une explosion de baies pour les amateurs de fruits rouges',
-    category: 'jus' as const,
-    ingredients: ['Fraise', 'Framboise', 'Myrtille', 'Açaï'],
-    benefits: ['Antioxydants', 'Mémoire', 'Vitalité'],
-    featured: false,
-  },
-  {
-    name: 'Ginger Power',
-    description: 'Shot concentré de gingembre pour booster votre immunité',
-    category: 'shot' as const,
-    ingredients: ['Gingembre', 'Citron', 'Miel', 'Cayenne'],
-    benefits: ['Immunité', 'Digestion', 'Anti-inflammatoire'],
     shotOnly: true,
   },
   {
-    name: 'Turmeric Gold',
-    description: 'Le pouvoir anti-inflammatoire du curcuma',
+    name: 'Green Boost',
+    description: 'Chlorophylle concentrée pour une détox express',
     category: 'shot' as const,
-    ingredients: ['Curcuma', 'Gingembre', 'Poivre noir', 'Orange'],
-    benefits: ['Anti-inflammatoire', 'Articulations', 'Immunité'],
+    ingredients: ['Épinard', 'Spiruline', 'Citron', 'Pomme'],
+    benefits: ['Détox', 'Énergie', 'Chlorophylle'],
     shotOnly: true,
   },
   {
-    name: 'Green Machine',
-    description: 'Concentré de chlorophylle pour une détox express',
+    name: 'Turmeric Power',
+    description: 'Le pouvoir du curcuma pour votre santé',
     category: 'shot' as const,
-    ingredients: ['Herbe de blé', 'Spiruline', 'Citron', 'Menthe'],
-    benefits: ['Détox', 'Énergie', 'Alcalinisant'],
+    ingredients: ['Curcuma', 'Gingembre', 'Citron', 'Poivre noir'],
+    benefits: ['Anti-inflammatoire', 'Antioxydants', 'Immunité'],
     shotOnly: true,
   },
+  // ============ PACKS (3 produits) ============
   {
     name: 'Pack Découverte',
-    description: 'Découvrez nos best-sellers avec ce pack varié',
+    description: 'Idéal pour découvrir nos saveurs : 4 jus variés pour explorer notre gamme',
     category: 'pack' as const,
-    ingredients: ['3 Jus (350ml)', '2 Shots (60ml)'],
-    benefits: ['Variété', 'Économique', 'Idéal pour débuter'],
+    ingredients: ['Golden Zest', 'Citrus Boost', 'Green Detox', 'Tropical Sunrise'],
+    benefits: ['Variété', 'Découverte', 'Économies'],
     packPrice: 22,
   },
   {
     name: 'Pack Énergie',
-    description: 'Le pack parfait pour rester en forme toute la semaine',
+    description: 'Pour un boost d\'énergie naturelle tout au long de la semaine',
     category: 'pack' as const,
-    ingredients: ['2 Citrus Boost', '2 Ginger Power', '1 Green Detox'],
-    benefits: ['Énergie', 'Immunité', 'Vitalité'],
-    packPrice: 26,
+    ingredients: ['Citrus Boost', 'Tropical Sunrise', 'Golden Glow', 'Carrot Boost'],
+    benefits: ['Énergie', 'Vitalité', 'Performance'],
+    packPrice: 22,
   },
   {
-    name: 'Pack Detox',
-    description: 'Une cure détox complète pour purifier votre organisme',
+    name: 'Pack Détox',
+    description: 'Une cure purifiante pour nettoyer votre organisme naturellement',
     category: 'pack' as const,
-    ingredients: ['2 Green Detox', '2 Green Machine', '1 Turmeric Gold'],
-    benefits: ['Détox', 'Purification', 'Bien-être'],
-    packPrice: 26,
+    ingredients: ['Green Detox', 'Apple Zest', 'Fresh Oasis', 'Green Boost'],
+    benefits: ['Détoxification', 'Légèreté', 'Bien-être'],
+    packPrice: 22,
   },
 ];
 
 export async function seedDatabase() {
   try {
+    console.log('🌱 Démarrage du seed...');
+    
     // Créer l'admin par défaut s'il n'existe pas
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@pressenaturel.com';
     const adminPassword = process.env.ADMIN_PASSWORD || 'PresseAdmin2024!';
@@ -111,18 +164,26 @@ export async function seedDatabase() {
         },
       });
       console.log('✅ Admin créé:', adminEmail);
+    } else {
+      console.log('ℹ️ Admin existe déjà:', adminEmail);
     }
 
-    // Créer les produits initiaux s'il n'y en a pas
+    // Vérifier si on doit mettre à jour les produits (force refresh une fois)
     const productCount = await prisma.product.count();
+    const expectedCount = initialProducts.length; // 17 produits
     
-    if (productCount === 0) {
+    // Si le nombre de produits ne correspond pas, on force la mise à jour
+    if (productCount !== expectedCount) {
+      console.log(`🔄 Mise à jour produits: ${productCount} -> ${expectedCount}`);
+      await prisma.product.deleteMany({});
       for (const product of initialProducts) {
         await prisma.product.create({ data: product });
       }
       console.log(`✅ ${initialProducts.length} produits créés`);
+    } else {
+      console.log(`ℹ️ ${productCount} produits déjà présents`);
     }
   } catch (error) {
-    console.error('Erreur seed:', error);
+    console.error('❌ Erreur seed:', error);
   }
 }
