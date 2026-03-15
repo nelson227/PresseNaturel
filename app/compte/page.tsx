@@ -70,32 +70,8 @@ export default function ComptePage() {
       if (storedOrders) {
         setOrders(JSON.parse(storedOrders));
       } else {
-        // Exemple de commandes pour démonstration
-        const demoOrders: Order[] = [
-          {
-            id: 'ORD-001',
-            date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-            items: [
-              { name: 'Énergie Verte', quantity: 2, price: 9, size: '350ml' },
-              { name: 'Shot Gingembre', quantity: 3, price: 4, size: '60ml' }
-            ],
-            total: 30,
-            status: 'delivered',
-            deliveryMethod: 'pickup'
-          },
-          {
-            id: 'ORD-002',
-            date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-            items: [
-              { name: 'Détox Carotte', quantity: 1, price: 11, size: '500ml' },
-              { name: 'Tropical Sunrise', quantity: 2, price: 9, size: '350ml' }
-            ],
-            total: 29,
-            status: 'confirmed',
-            deliveryMethod: 'delivery'
-          }
-        ];
-        setOrders(demoOrders);
+        // Pas de commandes - tableau vide
+        setOrders([]);
       }
     }
   }, [user]);
