@@ -5,11 +5,11 @@ import { prisma } from '../db.js';
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
 
-// Prix des produits
+// Prix des produits (synchronisés avec le frontend)
 const PRICES = {
   '60ml': 4,
-  '350ml': 7,
-  '500ml': 9,
+  '350ml': 9,
+  '500ml': 11,
 };
 
 // Créer une commande
