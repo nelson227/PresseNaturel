@@ -19,7 +19,7 @@ export default function AdminJusPage() {
     ingredients: '',
     benefits: '',
     featured: false,
-    image: undefined as string | undefined,
+    image: null as string | null,
   });
 
   const openAddModal = () => {
@@ -30,7 +30,7 @@ export default function AdminJusPage() {
       ingredients: '',
       benefits: '',
       featured: false,
-      image: undefined,
+      image: null,
     });
     setIsModalOpen(true);
   };
@@ -43,7 +43,7 @@ export default function AdminJusPage() {
       ingredients: product.ingredients.join(', '),
       benefits: product.benefits.join(', '),
       featured: product.featured || false,
-      image: product.image,
+      image: product.image || null,
     });
     setIsModalOpen(true);
   };

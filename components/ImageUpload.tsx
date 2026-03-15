@@ -4,8 +4,8 @@ import React, { useRef, useState } from 'react';
 import { FiUpload, FiX, FiImage } from 'react-icons/fi';
 
 interface ImageUploadProps {
-  value?: string;
-  onChange: (base64: string | undefined) => void;
+  value?: string | null;
+  onChange: (base64: string | null) => void;
   maxSizeMB?: number;
 }
 
@@ -68,7 +68,7 @@ export default function ImageUpload({ value, onChange, maxSizeMB = 10 }: ImageUp
   };
 
   const handleRemove = () => {
-    onChange(undefined);
+    onChange(null);
     if (inputRef.current) {
       inputRef.current.value = '';
     }

@@ -19,7 +19,7 @@ export default function AdminPacksPage() {
     contents: '',
     benefits: '',
     packPrice: 22,
-    image: undefined as string | undefined,
+    image: null as string | null,
   });
 
   const openAddModal = () => {
@@ -30,7 +30,7 @@ export default function AdminPacksPage() {
       contents: '',
       benefits: '',
       packPrice: 22,
-      image: undefined,
+      image: null,
     });
     setIsModalOpen(true);
   };
@@ -43,7 +43,7 @@ export default function AdminPacksPage() {
       contents: product.ingredients.join(', '),
       benefits: product.benefits.join(', '),
       packPrice: product.packPrice || 22,
-      image: product.image,
+      image: product.image || null,
     });
     setIsModalOpen(true);
   };

@@ -7,7 +7,7 @@ export interface Product {
   description: string;
   ingredients: string[];
   benefits: string[];
-  image?: string;
+  image?: string | null;
   shotOnly?: boolean; // Pour les produits disponibles uniquement en shot (60ml)
   featured?: boolean; // Pour les incontournables
   packPrice?: number; // Prix pour les packs

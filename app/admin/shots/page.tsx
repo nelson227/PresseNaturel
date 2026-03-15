@@ -18,7 +18,7 @@ export default function AdminShotsPage() {
     description: '',
     ingredients: '',
     benefits: '',
-    image: undefined as string | undefined,
+    image: null as string | null,
   });
 
   const openAddModal = () => {
@@ -28,7 +28,7 @@ export default function AdminShotsPage() {
       description: '',
       ingredients: '',
       benefits: '',
-      image: undefined,
+      image: null,
     });
     setIsModalOpen(true);
   };
@@ -40,7 +40,7 @@ export default function AdminShotsPage() {
       description: product.description,
       ingredients: product.ingredients.join(', '),
       benefits: product.benefits.join(', '),
-      image: product.image,
+      image: product.image || null,
     });
     setIsModalOpen(true);
   };
