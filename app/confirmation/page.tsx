@@ -7,10 +7,12 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Button from '@/components/Button';
 import { useAuth } from '@/contexts/AuthContext';
-import { FiArrowLeft, FiCheckCircle, FiDownload } from 'react-icons/fi';
+import { FiArrowLeft, FiCheckCircle, FiDownload, FiLoader } from 'react-icons/fi';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import Image from 'next/image';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://pressenaturel-production.up.railway.app/api';
 
 interface CartItem {
   productId: string;
@@ -44,85 +46,71 @@ function ConfirmationContent() {
   const { user } = useAuth();
   const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const receiptRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Récupérer les données depuis les paramètres URL
-    const cartParam = searchParams.get('cart');
-    const totalParam = searchParams.get('total');
-    const deliveryMethod = searchParams.get('deliveryMethod');
-    const paymentMethod = searchParams.get('paymentMethod');
-    const notes = searchParams.get('notes') || '';
-    const firstName = searchParams.get('firstName') || '';
-    const lastName = searchParams.get('lastName') || '';
-    const email = searchParams.get('email') || '';
-    const phone = searchParams.get('phone') || '';
-    const address = searchParams.get('address') || '';
-    const city = searchParams.get('city') || '';
-    const postalCode = searchParams.get('postalCode') || '';
+    const fetchOrder = async () => {
+      const orderNumber = searchParams.get('orderNumber');
 
-    if (cartParam && deliveryMethod && paymentMethod) {
+      if (!orderNumber) {
+        setError('Numéro de commande manquant');
+        setLoading(false);
+        return;
+      }
+
       try {
-        const items: CartItem[] = JSON.parse(cartParam);
-        const total = parseFloat(totalParam || '0');
+        const response = await fetch(`${API_URL}/orders/${orderNumber}`);
+        
+        if (!response.ok) {
+          throw new Error('Commande non trouvée');
+        }
 
-        const orderNumber = `PN${Date.now().toString().slice(-8)}`;
-        const orderDate = new Date().toLocaleDateString('fr-CA', {
+        const order = await response.json();
+
+        // Transformer les données du backend au format attendu
+        const orderDate = new Date(order.createdAt).toLocaleDateString('fr-CA', {
           year: 'numeric',
           month: 'long',
           day: 'numeric',
         });
 
-        const order: OrderData = {
-          orderNumber,
+        const transformedOrder: OrderData = {
+          orderNumber: order.orderNumber,
           orderDate,
-          items,
-          total,
-          deliveryMethod,
-          paymentMethod,
-          notes,
+          items: order.items.map((item: any) => ({
+            productId: item.productId,
+            name: item.productName,
+            size: item.size,
+            quantity: item.quantity,
+            price: item.unitPrice,
+          })),
+          total: order.totalPrice,
+          deliveryMethod: order.deliveryMethod,
+          paymentMethod: order.paymentMethod,
+          notes: order.notes || '',
           customer: {
-            firstName,
-            lastName,
-            email,
-            phone,
-            address,
-            city,
-            postalCode,
+            firstName: order.customerFirstName,
+            lastName: order.customerLastName,
+            email: order.customerEmail,
+            phone: order.customerPhone,
+            address: order.deliveryAddress || '',
+            city: order.deliveryCity || '',
+            postalCode: order.deliveryPostalCode || '',
           },
         };
 
-        setOrderData(order);
-
-        // Sauvegarder la commande dans localStorage pour le dashboard
-        if (user) {
-          const storageKey = `presse_naturel_orders_${user.id}`;
-          const existingOrders = localStorage.getItem(storageKey);
-          const orders = existingOrders ? JSON.parse(existingOrders) : [];
-          
-          orders.unshift({
-            id: orderNumber,
-            date: new Date().toISOString(),
-            items: items.map(item => ({
-              name: item.name,
-              quantity: item.quantity,
-              price: item.price,
-              size: item.size
-            })),
-            total,
-            status: 'pending',
-            deliveryMethod,
-          });
-          
-          localStorage.setItem(storageKey, JSON.stringify(orders));
-        }
-      } catch (error) {
-        console.error('Erreur parsing cart:', error);
+        setOrderData(transformedOrder);
+      } catch (err) {
+        console.error('Erreur lors de la récupération de la commande:', err);
+        setError('Impossible de charger les détails de la commande');
       }
-    }
 
-    setLoading(false);
-  }, [searchParams, user]);
+      setLoading(false);
+    };
+
+    fetchOrder();
+  }, [searchParams]);
 
   const handleDownloadPDF = async () => {
     if (!receiptRef.current) return;
@@ -169,18 +157,21 @@ function ConfirmationContent() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg text-presse-dark">Chargement...</p>
+        <div className="flex items-center gap-3 text-lg text-presse-dark">
+          <FiLoader className="animate-spin" />
+          Chargement de votre commande...
+        </div>
       </div>
     );
   }
 
-  if (!orderData) {
+  if (error || !orderData) {
     return (
       <div className="min-h-screen bg-presse-white">
         <Header />
         <section className="py-20">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p className="text-lg text-red-600 mb-6">Erreur: Données de commande manquantes</p>
+            <p className="text-lg text-red-600 mb-6">{error || 'Données de commande manquantes'}</p>
             <Link href="/commander">
               <Button>Retourner à la commande</Button>
             </Link>

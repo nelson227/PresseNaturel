@@ -7,7 +7,9 @@ import Footer from '@/components/Footer';
 import Button from '@/components/Button';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { FiUser, FiPackage, FiEdit2, FiSave, FiX, FiShoppingCart, FiDollarSign, FiCalendar, FiMapPin } from 'react-icons/fi';
+import { FiUser, FiPackage, FiEdit2, FiSave, FiX, FiShoppingCart, FiDollarSign, FiCalendar, FiMapPin, FiLoader } from 'react-icons/fi';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://pressenaturel-production.up.railway.app/api';
 
 interface Order {
   id: string;
@@ -36,6 +38,7 @@ export default function ComptePage() {
   
   // Historique des commandes
   const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
   
   // Auth form state
   const [isLogin, setIsLogin] = useState(true);
@@ -63,17 +66,49 @@ export default function ComptePage() {
     }
   }, [user]);
 
-  // Charger l'historique des commandes depuis localStorage
+  // Charger l'historique des commandes depuis l'API backend
   useEffect(() => {
-    if (user) {
-      const storedOrders = localStorage.getItem(`presse_naturel_orders_${user.id}`);
-      if (storedOrders) {
-        setOrders(JSON.parse(storedOrders));
-      } else {
-        // Pas de commandes - tableau vide
+    const fetchOrders = async () => {
+      if (!user) return;
+
+      setOrdersLoading(true);
+      try {
+        const token = localStorage.getItem('presse_naturel_token');
+        const response = await fetch(`${API_URL}/orders/user/history`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          // Transformer les données du backend au format attendu
+          const transformedOrders: Order[] = data.map((order: any) => ({
+            id: order.orderNumber,
+            date: order.createdAt,
+            items: order.items.map((item: any) => ({
+              name: item.productName,
+              quantity: item.quantity,
+              price: item.unitPrice,
+              size: item.size,
+            })),
+            total: order.totalPrice,
+            status: order.status,
+            deliveryMethod: order.deliveryMethod,
+          }));
+          setOrders(transformedOrders);
+        } else {
+          console.error('Erreur lors du chargement des commandes');
+          setOrders([]);
+        }
+      } catch (error) {
+        console.error('Erreur réseau:', error);
         setOrders([]);
       }
-    }
+      setOrdersLoading(false);
+    };
+
+    fetchOrders();
   }, [user]);
 
   // Calcul des statistiques
@@ -380,7 +415,12 @@ export default function ComptePage() {
 
             {activeTab === 'orders' && (
               <div className="space-y-4">
-                {orders.length === 0 ? (
+                {ordersLoading ? (
+                  <div className="bg-white rounded-xl shadow-sm p-8 text-center">
+                    <FiLoader size={48} className="mx-auto text-presse-green mb-4 animate-spin" />
+                    <p className="text-gray-500">Chargement de vos commandes...</p>
+                  </div>
+                ) : orders.length === 0 ? (
                   <div className="bg-white rounded-xl shadow-sm p-8 text-center">
                     <FiPackage size={48} className="mx-auto text-gray-300 mb-4" />
                     <h3 className="font-semibold text-xl text-presse-dark mb-2">Aucune commande</h3>

@@ -7,14 +7,20 @@ import Footer from '@/components/Footer';
 import Button from '@/components/Button';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { FiTrash2, FiMinus, FiPlus, FiShoppingBag, FiX, FiUser, FiLock } from 'react-icons/fi';
+import { FiTrash2, FiMinus, FiPlus, FiShoppingBag, FiX, FiUser, FiLock, FiLoader } from 'react-icons/fi';
 import Link from 'next/link';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://pressenaturel-production.up.railway.app/api';
 
 export default function CommanderPage() {
   const router = useRouter();
   const { items, removeFromCart, updateQuantity, clearCart, getTotalPrice, getItemCount } = useCart();
   const { user, login, register } = useAuth();
   const isAuthenticated = !!user;
+  
+  // État de soumission
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   
   // Modal d'authentification
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -90,8 +96,9 @@ export default function CommanderPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError('');
 
     // Vérifier si l'utilisateur est connecté
     if (!isAuthenticated) {
@@ -116,34 +123,60 @@ export default function CommanderPage() {
       return;
     }
 
-    // Créer le résumé du panier pour la confirmation
-    const cartSummary = items.map(item => ({
-      productId: item.productId,
-      name: item.name,
-      size: item.size,
-      quantity: item.quantity,
-      price: item.price
-    }));
+    setIsSubmitting(true);
 
-    // Créer les paramètres de requête
-    const params = new URLSearchParams({
-      cart: JSON.stringify(cartSummary),
-      total: getTotalPrice().toFixed(2),
-      deliveryMethod,
-      paymentMethod,
-      notes,
-      firstName,
-      lastName,
-      email,
-      phone,
-      address,
-      city,
-      postalCode,
-    });
+    try {
+      // Préparer les données de la commande
+      const orderData = {
+        customer: {
+          firstName,
+          lastName,
+          email,
+          phone,
+          address: address || null,
+          city: city || null,
+          postalCode: postalCode || null,
+        },
+        items: items.map(item => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          size: item.size,
+        })),
+        deliveryMethod,
+        paymentMethod,
+        notes: notes || null,
+      };
 
-    // Vider le panier et rediriger vers la confirmation
-    clearCart();
-    router.push(`/confirmation?${params.toString()}`);
+      // Récupérer le token utilisateur
+      const userToken = localStorage.getItem('presse_naturel_user_token');
+
+      // Envoyer la commande au backend
+      const response = await fetch(`${API_URL}/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(userToken ? { 'Authorization': `Bearer ${userToken}` } : {}),
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Erreur lors de la commande');
+      }
+
+      const { order } = await response.json();
+
+      // Vider le panier
+      clearCart();
+
+      // Rediriger vers la page de confirmation avec le numéro de commande
+      router.push(`/confirmation?orderNumber=${order.orderNumber}`);
+    } catch (error: any) {
+      console.error('Erreur commande:', error);
+      setSubmitError(error.message || 'Une erreur est survenue lors de la commande');
+      setIsSubmitting(false);
+    }
   };
 
   const totalPrice = getTotalPrice();
@@ -477,14 +510,33 @@ export default function CommanderPage() {
                 </div>
               </div>
 
+              {/* Message d'erreur */}
+              {submitError && (
+                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                  {submitError}
+                </div>
+              )}
+
               {/* Bouton de confirmation */}
               <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center justify-between">
                 <div className="text-center sm:text-left">
                   <p className="text-sm text-gray-500">Total de la commande</p>
                   <p className="text-3xl font-bold text-presse-green">${totalPrice.toFixed(2)}</p>
                 </div>
-                <Button size="lg" type="submit" className="w-full sm:w-auto">
-                  Confirmer la commande
+                <Button 
+                  size="lg" 
+                  type="submit" 
+                  className="w-full sm:w-auto"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-2">
+                      <FiLoader className="animate-spin" />
+                      Envoi en cours...
+                    </span>
+                  ) : (
+                    'Confirmer la commande'
+                  )}
                 </Button>
               </div>
             </form>
