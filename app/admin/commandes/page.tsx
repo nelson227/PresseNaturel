@@ -180,7 +180,7 @@ export default function AdminCommandesPage() {
                         {formatDate(order.createdAt)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="font-semibold text-gray-900">{order.totalPrice.toFixed(2)}€</span>
+                        <span className="font-semibold text-gray-900">{order.totalPrice.toFixed(2)}$</span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${status.bgColor} ${status.color}`}>
@@ -333,7 +333,7 @@ export default function AdminCommandesPage() {
                     </div>
                     <div className="border-t pt-3 flex justify-between items-center">
                       <p className="font-semibold text-lg">Total</p>
-                      <p className="font-bold text-xl text-presse-green">{selectedOrder.totalPrice.toFixed(2)}€</p>
+                      <p className="font-bold text-xl text-presse-green">{selectedOrder.totalPrice.toFixed(2)}$</p>
                     </div>
                   </div>
                 </div>

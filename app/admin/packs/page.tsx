@@ -110,7 +110,7 @@ export default function AdminPacksPage() {
               <div className={`aspect-video bg-gradient-to-br ${getPackGradient(product.name)} flex items-center justify-center relative`}>
                 <span className="text-6xl">{getPackEmoji(product.name)}</span>
                 <span className="absolute top-2 right-2 bg-presse-green text-white text-sm font-bold px-3 py-1 rounded-full">
-                  {product.packPrice || 22}€
+                  {product.packPrice || 22}$
                 </span>
               </div>
               <div className="p-4">
@@ -244,7 +244,7 @@ export default function AdminPacksPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Prix du pack (€) *
+                    Prix du pack ($) *
                   </label>
                   <input
                     type="number"
