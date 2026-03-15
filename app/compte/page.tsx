@@ -16,7 +16,7 @@ interface Order {
   date: string;
   items: Array<{ name: string; quantity: number; price: number; size: string }>;
   total: number;
-  status: 'pending' | 'confirmed' | 'delivered';
+  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'delivered' | 'cancelled';
   deliveryMethod: string;
 }
 
@@ -197,7 +197,12 @@ export default function ComptePage() {
     switch (status) {
       case 'pending': return { text: 'En attente', color: 'bg-yellow-100 text-yellow-800' };
       case 'confirmed': return { text: 'Confirmée', color: 'bg-blue-100 text-blue-800' };
+      case 'preparing': return { text: 'En préparation', color: 'bg-purple-100 text-purple-800' };
+      case 'ready': return { text: 'Prête', color: 'bg-green-100 text-green-800' };
+      case 'completed': return { text: 'Terminée', color: 'bg-gray-100 text-gray-800' };
       case 'delivered': return { text: 'Livrée', color: 'bg-green-100 text-green-800' };
+      case 'cancelled': return { text: 'Annulée', color: 'bg-red-100 text-red-800' };
+      default: return { text: status, color: 'bg-gray-100 text-gray-800' };
     }
   };
 
