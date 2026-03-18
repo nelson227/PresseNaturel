@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useCa
 import { Product, OrderStatus } from '@/lib/types';
 import { PRODUCTS as INITIAL_PRODUCTS } from '@/lib/products';
 import { productsAPI, adminAPI } from '@/lib/api';
+import { useSocket } from '@/contexts/SocketContext';
 
 export interface Order {
   id: string;
@@ -59,6 +60,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const { socket, joinAdmin } = useSocket();
 
   // Charger les produits depuis l'API backend
   const refreshProducts = useCallback(async () => {
@@ -144,6 +146,103 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
     loadData();
   }, [refreshProducts, refreshOrders]);
+
+  // Écouter les événements WebSocket pour les mises à jour en temps réel
+  useEffect(() => {
+    if (!socket) return;
+
+    // Si admin connecté, rejoindre la room admin
+    if (adminAPI.isAuthenticated()) {
+      joinAdmin();
+    }
+
+    // === Événements Produits (tous les clients) ===
+    const handleProductCreated = (product: any) => {
+      const mapped: Product = {
+        id: product.id,
+        name: product.name,
+        description: product.description || '',
+        category: product.category,
+        ingredients: product.ingredients || [],
+        benefits: product.benefits || [],
+        image: product.image,
+        featured: product.featured || false,
+        createdAt: product.createdAt,
+      };
+      setProducts(prev => {
+        if (prev.some(p => p.id === mapped.id)) return prev;
+        return [...prev, mapped];
+      });
+    };
+
+    const handleProductUpdated = (product: any) => {
+      setProducts(prev => prev.map(p => p.id === product.id ? {
+        ...p,
+        name: product.name,
+        description: product.description || p.description,
+        category: product.category || p.category,
+        ingredients: product.ingredients || p.ingredients,
+        benefits: product.benefits || p.benefits,
+        image: product.image !== undefined ? product.image : p.image,
+        featured: product.featured ?? p.featured,
+      } : p));
+    };
+
+    const handleProductDeleted = (productId: string) => {
+      setProducts(prev => prev.filter(p => p.id !== productId));
+    };
+
+    // === Événements Commandes (admin uniquement) ===
+    const handleNewOrder = (order: any) => {
+      const mapped: Order = {
+        id: order.id,
+        orderNumber: order.orderNumber,
+        customer: {
+          firstName: order.customerFirstName || '',
+          lastName: order.customerLastName || '',
+          email: order.customerEmail || '',
+          phone: order.customerPhone || '',
+          address: order.customerAddress || '',
+          city: order.customerCity || '',
+          postalCode: order.customerPostalCode || '',
+        },
+        product: {
+          id: order.items?.[0]?.productId || '',
+          name: order.items?.[0]?.product?.name || 'Produit',
+        },
+        size: order.items?.[0]?.size || '350ml',
+        quantity: order.items?.[0]?.quantity || 1,
+        totalPrice: order.totalPrice || 0,
+        deliveryMethod: order.deliveryMethod || 'pickup',
+        paymentMethod: order.paymentMethod || 'interac',
+        notes: order.notes,
+        status: order.status,
+        createdAt: order.createdAt,
+      };
+      setOrders(prev => {
+        if (prev.some(o => o.id === mapped.id)) return prev;
+        return [mapped, ...prev];
+      });
+    };
+
+    const handleOrderUpdated = (order: any) => {
+      setOrders(prev => prev.map(o => o.id === order.id ? { ...o, status: order.status } : o));
+    };
+
+    socket.on('product:created', handleProductCreated);
+    socket.on('product:updated', handleProductUpdated);
+    socket.on('product:deleted', handleProductDeleted);
+    socket.on('order:new', handleNewOrder);
+    socket.on('order:updated', handleOrderUpdated);
+
+    return () => {
+      socket.off('product:created', handleProductCreated);
+      socket.off('product:updated', handleProductUpdated);
+      socket.off('product:deleted', handleProductDeleted);
+      socket.off('order:new', handleNewOrder);
+      socket.off('order:updated', handleOrderUpdated);
+    };
+  }, [socket, joinAdmin]);
 
   // Ajouter un produit via API
   const addProduct = async (product: Omit<Product, 'id' | 'createdAt'>) => {

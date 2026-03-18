@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../db.js';
+import { getIO } from '../socket.js';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
@@ -89,6 +90,18 @@ router.post('/', async (req, res) => {
     });
 
     res.status(201).json({ order });
+
+    // Notifier les admins d'une nouvelle commande en temps réel
+    try {
+      const io = getIO();
+      io.to('admin').emit('order:new', order);
+      // Notifier l'utilisateur si connecté
+      if (userId) {
+        io.to(`user:${userId}`).emit('order:created', order);
+      }
+    } catch (e) {
+      console.log('Socket emit error (non-blocking):', e);
+    }
   } catch (error) {
     console.error('Erreur création commande:', error);
     res.status(500).json({ error: 'Erreur lors de la création de la commande' });

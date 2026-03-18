@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useSocket } from '@/contexts/SocketContext';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://pressenaturel-production.up.railway.app/api';
 
@@ -40,6 +41,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { joinUser } = useSocket();
 
   // Charger l'utilisateur depuis le token au démarrage
   useEffect(() => {
@@ -55,6 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (response.ok) {
             const data = await response.json();
             setUser(data.user);
+            joinUser(data.user.id);
           } else {
             // Token invalide, le supprimer
             localStorage.removeItem('presse_naturel_token');
@@ -88,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Stocker le token et l'utilisateur
       localStorage.setItem('presse_naturel_token', data.token);
       setUser(data.user);
+      joinUser(data.user.id);
       
       return { success: true };
     } catch (error) {
@@ -115,6 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Stocker le token et connecter automatiquement
       localStorage.setItem('presse_naturel_token', data.token);
       setUser(data.user);
+      joinUser(data.user.id);
 
       return { success: true };
     } catch (error) {

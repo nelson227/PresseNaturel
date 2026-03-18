@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { adminAPI } from '@/lib/api';
+import { useSocket } from '@/contexts/SocketContext';
 
 interface AdminContextType {
   isAdmin: boolean;
@@ -15,20 +16,23 @@ const AdminContext = createContext<AdminContextType | undefined>(undefined);
 export function AdminProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const { joinAdmin } = useSocket();
 
   useEffect(() => {
     // Vérifier si un token admin valide existe
     const token = localStorage.getItem('pn_admin_token');
     if (token) {
       setIsAdmin(true);
+      joinAdmin();
     }
     setIsLoading(false);
-  }, []);
+  }, [joinAdmin]);
 
   const adminLogin = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
       await adminAPI.login(email, password);
       setIsAdmin(true);
+      joinAdmin();
       return { success: true };
     } catch (error: any) {
       console.error('Erreur connexion admin:', error);

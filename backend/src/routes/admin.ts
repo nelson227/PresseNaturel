@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../db.js';
+import { getIO } from '../socket.js';
 
 const router = Router();
 
@@ -180,6 +181,17 @@ router.patch('/orders/:id/status', requireAdmin, async (req, res) => {
     });
 
     res.json({ order });
+
+    // Notifier tous les clients du changement de statut
+    try {
+      const io = getIO();
+      io.to('admin').emit('order:updated', order);
+      if (order.userId) {
+        io.to(`user:${order.userId}`).emit('order:statusChanged', { orderId: order.id, status: order.status });
+      }
+    } catch (e) {
+      console.log('Socket emit error (non-blocking):', e);
+    }
   } catch (error) {
     console.error('Erreur mise à jour commande:', error);
     res.status(500).json({ error: 'Erreur lors de la mise à jour' });
@@ -206,6 +218,13 @@ router.post('/products', requireAdmin, async (req, res) => {
     });
 
     res.status(201).json({ product });
+
+    // Notifier tous les clients du nouveau produit
+    try {
+      getIO().emit('product:created', product);
+    } catch (e) {
+      console.log('Socket emit error (non-blocking):', e);
+    }
   } catch (error) {
     console.error('Erreur création produit:', error);
     res.status(500).json({ error: 'Erreur lors de la création' });
@@ -234,6 +253,13 @@ router.put('/products/:id', requireAdmin, async (req, res) => {
     });
 
     res.json({ product });
+
+    // Notifier tous les clients de la mise à jour
+    try {
+      getIO().emit('product:updated', product);
+    } catch (e) {
+      console.log('Socket emit error (non-blocking):', e);
+    }
   } catch (error) {
     console.error('Erreur mise à jour produit:', error);
     res.status(500).json({ error: 'Erreur lors de la mise à jour' });
@@ -251,6 +277,13 @@ router.delete('/products/:id', requireAdmin, async (req, res) => {
     });
 
     res.json({ success: true });
+
+    // Notifier tous les clients de la suppression
+    try {
+      getIO().emit('product:deleted', id);
+    } catch (e) {
+      console.log('Socket emit error (non-blocking):', e);
+    }
   } catch (error) {
     console.error('Erreur suppression produit:', error);
     res.status(500).json({ error: 'Erreur lors de la suppression' });

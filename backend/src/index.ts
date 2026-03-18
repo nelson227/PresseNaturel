@@ -1,7 +1,9 @@
 import express from 'express';
+import { createServer } from 'http';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { prisma } from './db.js';
+import { initSocket } from './socket.js';
 
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
@@ -12,11 +14,16 @@ import { seedDatabase } from './seed.js';
 dotenv.config();
 
 const app = express();
+const httpServer = createServer(app);
 const PORT = process.env.PORT || 3001;
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+// Initialiser Socket.IO
+initSocket(httpServer, FRONTEND_URL);
 
 // Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: FRONTEND_URL,
   credentials: true,
 }));
 app.use(express.json({ limit: '50mb' }));
@@ -43,8 +50,9 @@ async function main() {
     // Seed initial (admin + produits)
     await seedDatabase();
 
-    app.listen(PORT, () => {
+    httpServer.listen(PORT, () => {
       console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
+      console.log('🔌 WebSocket prêt');
     });
   } catch (error) {
     console.error('❌ Erreur de démarrage:', error);
