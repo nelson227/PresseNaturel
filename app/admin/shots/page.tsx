@@ -94,7 +94,7 @@ export default function AdminShotsPage() {
         {/* Info Banner */}
         <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
           <p className="text-orange-800 text-sm">
-            <strong>💡 Info :</strong> Tous les shots sont automatiquement proposés en format 60ml uniquement au prix de 4$.
+            <strong>💡 Info :</strong> Tous les shots sont automatiquement proposés en format 60ml uniquement au prix de 3$.
           </p>
         </div>
 
@@ -109,7 +109,7 @@ export default function AdminShotsPage() {
                   <span className="text-6xl">⚡</span>
                 )}
                 <span className="absolute top-2 right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded">
-                  60ml • 4$
+                  60ml • 3$
                 </span>
               </div>
               <div className="p-4">
@@ -249,7 +249,7 @@ export default function AdminShotsPage() {
 
                 <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600">
                   <p>📦 Format : 60ml uniquement</p>
-                  <p>💰 Prix : 4$ (automatique)</p>
+                  <p>💰 Prix : 3$ (automatique)</p>
                 </div>
 
                 <div className="flex gap-3 pt-4">

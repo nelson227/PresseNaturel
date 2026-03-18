@@ -7,7 +7,7 @@ interface ExtendedPrices {
 }
 
 const PRICES: ExtendedPrices = {
-  '60ml': 4,
+  '60ml': 3,
   '350ml': 6,
   '500ml': 7,
 };

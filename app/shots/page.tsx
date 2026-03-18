@@ -27,7 +27,7 @@ export default function ShotsPage() {
             {/* Badge 60ml */}
             <div className="mt-6 inline-flex items-center gap-2 bg-presse-green text-white px-4 py-2 rounded-full">
               <span className="text-lg">⚡</span>
-              <span className="font-poppins font-semibold">Format unique : 60ml – 4$</span>
+              <span className="font-poppins font-semibold">Format unique : 60ml – 3$</span>
             </div>
           </div>
 

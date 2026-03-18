@@ -79,9 +79,9 @@ export default function ProductCard({ product, featured = false }: ProductCardPr
             <div className="flex items-center justify-between pt-4 border-t border-presse-green-light">
               <span className="text-sm font-poppins font-semibold text-presse-green">
                 {product.category === 'shot' || product.shotOnly ? (
-                  <>60ml – 4$</>
+                  <>60ml – 3$</>
                 ) : (
-                  <>À partir de 9$</>
+                  <>À partir de 6$</>
                 )}
               </span>
               <div className="text-presse-green group-hover:translate-x-1 transition-transform">

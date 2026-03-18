@@ -7,9 +7,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
 
 // Prix des produits (synchronisés avec le frontend)
 const PRICES = {
-  '60ml': 4,
-  '350ml': 9,
-  '500ml': 11,
+  '60ml': 3,
+  '350ml': 6,
+  '500ml': 7,
 };
 
 // Créer une commande

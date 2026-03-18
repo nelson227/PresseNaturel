@@ -1,13 +1,13 @@
 // Configuration constants pour le site
 
 export const PRICES = {
-  '60ml': 4,
-  '350ml': 9,
-  '500ml': 11,
-  shot: 4,
+  '60ml': 3,
+  '350ml': 6,
+  '500ml': 7,
+  shot: 3,
   jus: {
-    '350ml': 9,
-    '500ml': 11
+    '350ml': 6,
+    '500ml': 7
   },
   pack: {
     '350ml': 22,
